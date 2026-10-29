@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FixVisual — бесплатный визуал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text: #f4f3f7;
+    --muted: #8b8996;
+    --dim: #5a5866;
+    --line: rgba(255,255,255,.09);
+    --line-2: rgba(255,255,255,.16);
+    --solid: rgba(12,11,16,.72);
+    --accent: #a1a1aa;
+    --accent-2: #d4d4d8;
+    --good: #d4d4d8;
+    --bad: #f87171;
+    --gold: #e4e4e7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #050506; color: var(--text); font: 15px/1.6 Onest, system-ui, sans-serif; overflow-x: hidden; }
+  .mono { font-family: "JetBrains Mono", Consolas, monospace; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; position: relative; }
+  .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; letter-spacing: -.01em; }
+
+  /* ===== фон: летающие функции, поверх них огонь, поверх всего — свечение курсора ===== */
+  #words { position: fixed; inset: 0; z-index: -3; overflow: hidden; pointer-events: none; }
+  #words span {
+    position: absolute; left: 0; top: 0; white-space: nowrap; font-weight: 600; color: #fff;
+    padding: 6px 12px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.05);
+    will-change: transform;
+  }
+  /* у каждой функции своя форма */
+  #words .s0 { border-radius: 999px; }
+  #words .s1 { border-radius: 2px; }
+  #words .s2 { border-radius: 50%; padding: 18px 14px; }
+  #words .s3 { clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%); padding: 7px 22px; border: 0; background: rgba(255,255,255,.12); }
+  #words .s4 { border-radius: 0 14px 0 14px; }
+  #words .s5 { border: 0; border-bottom: 1px solid rgba(255,255,255,.4); background: none; padding: 2px 0; font-family: "JetBrains Mono", monospace; font-weight: 400; }
+  #words .s6 { clip-path: polygon(0 0, 85% 0, 100% 50%, 85% 100%, 0 100%); border: 0; background: rgba(255,255,255,.12); padding: 6px 22px 6px 12px; }
+  #words .s7 { border-style: dashed; border-radius: 8px; }
+  #words .s8 { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; border: 0; background: none; font-size: 1.4em !important; }
+  #fire { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
+  #glow {
+    position: fixed; left: 0; top: 0; z-index: 60; width: 520px; height: 520px; margin: -260px 0 0 -260px;
+    border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+    background: radial-gradient(circle, rgba(255,255,255,.06), rgba(255,255,255,.02) 40%, transparent 70%);
+    transition: opacity .3s;
+  }
+  @media (hover: none) { #glow { display: none; } }
+
+  /* ===== шапка ===== */
+  header { position: fixed; inset: 0 0 auto; z-index: 30; transition: background .3s, border-color .3s; border-bottom: 1px solid transparent; }
+  header.solid { background: rgba(0,0,0,.6); backdrop-filter: blur(14px); border-color: var(--line); }
+  .nav { position: relative; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+  .logo i { width: 10px; height: 10px; background: #e4e4e7; transform: rotate(45deg); }
+  /* ссылки — ровно по центру страницы, независимо от ширины логотипа и кнопок */
+  .nav nav { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 28px; }
+  .nav nav a { color: var(--muted); font: 500 12px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; transition: color .2s; }
+  .nav nav a:hover { color: var(--text); }
+  .nav .right { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    height: 38px; padding: 0 16px; border-radius: 3px; border: 1px solid #3f3f46;
+    background: transparent; font: 500 12px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .06em;
+    cursor: pointer; white-space: nowrap; transition: background .2s, border-color .2s, color .2s;
+  }
+  .btn:hover { border-color: #a1a1aa; }
+  .btn.white { background: #e4e4e7; color: #09090b; border-color: #e4e4e7; }
+  .btn.white:hover { background: #fafafa; }
+  .btn.gold { background: #e4e4e7; border-color: #e4e4e7; color: #09090b; }
+  .btn.big { height: 48px; padding: 0 22px; font-size: 13px; }
+  @media (max-width: 760px) { .nav nav { display: none; } .nav .right .btn:first-child { display: none; } }
+
+  /* ===== главный экран ===== */
+  .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 0 60px; }
+  .tag { display: inline-flex; align-items: center; gap: 10px; color: #a1a1aa; font: 500 12px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .14em; }
+  .tag i { width: 22px; height: 1px; background: #71717a; }
+  .hero h1 { margin-top: 22px; font-size: clamp(60px, 11vw, 140px); line-height: .9; text-shadow: 0 0 60px rgba(0,0,0,.8); }
+  .hero h1 em { color: #a1a1aa; }
+  .hero .vs { margin-top: 24px; font-size: clamp(18px, 2.4vw, 24px); color: #e2e0ea; }
+  .hero .vs s { color: var(--muted); text-decoration-color: #e4e4e7; text-decoration-thickness: 2px; }
+  .hero p { margin: 14px auto 0; max-width: 560px; color: #a9a6b4; }
+  .hero .cta { margin-top: 32px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  section { padding: 100px 0; }
+  .kicker { color: #71717a; font: 500 12px "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+  .kicker::before { content: "/ "; color: #3f3f46; }
+  .title { font-size: clamp(40px, 6vw, 72px); line-height: 1; margin-top: 10px; }
+  .lead { margin-top: 14px; color: #a9a6b4; max-width: 560px; }
+  .center { text-align: center; } .center .lead { margin-left: auto; margin-right: auto; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 22px; background: var(--solid); backdrop-filter: blur(10px); }
+  .stats div { padding: 30px 10px; text-align: center; }
+  .stats div + div { border-left: 1px solid var(--line); }
+  .stats b { display: block; font-size: 54px; line-height: 1; }
+  .stats span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }
+  @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats div:nth-child(3) { border-left: 0; } .stats div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+  /* ===== наше меню (копия ClickGuiGlassScreen) ===== */
+  /* меню изогнуто (как экран FixOS) и выпрямляется, пока прокручиваешь к нему */
+  .scene-wrap { perspective: 1400px; margin-top: 44px; }
+  .scene { position: relative; border-radius: 26px; overflow: hidden; border: 1px solid var(--line); padding: 40px; background: #0a0a0b;
+    transform-origin: 50% 100%; will-change: transform; transform: rotateX(var(--bend, 0deg)) scale(var(--sc, 1)); border-top-left-radius: var(--curve, 26px) 60px; border-top-right-radius: var(--curve, 26px) 60px; }
+  .scene::before { content: ""; position: absolute; inset: 0; backdrop-filter: blur(6px); background: rgba(0,0,0,.27); }
+  @media (max-width: 900px) { .scene { padding: 10px; } }
+  .gw {
+    position: relative; display: grid; grid-template-columns: 170px 1fr; grid-template-rows: 1fr 30px; height: 560px;
+    border-radius: 18px; border: 1px solid rgba(255,255,255,.31);
+    background: linear-gradient(180deg, rgba(38,38,42,.82), rgba(14,14,16,.92));
+    box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
+    backdrop-filter: blur(16px); font-size: 13px; color: #dadde6; user-select: none; overflow: hidden;
+  }
+  .gw::before { content: ""; position: absolute; left: 1px; right: 1px; top: 1px; height: 110px; border-radius: 17px 17px 0 0; background: linear-gradient(rgba(255,255,255,.12), transparent); pointer-events: none; }
+  .g-side { position: relative; border-right: 1px solid rgba(255,255,255,.13); padding: 12px 10px; display: flex; flex-direction: column; gap: 3px; }
+  .g-logo { height: 30px; border-radius: 999px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.19); display: flex; align-items: center; padding: 0 12px; font-weight: 700; margin-bottom: 10px; }
+  .g-logo b { background: linear-gradient(90deg, #71717a, #d4d4d8, #e4e4e7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #g-cats { display: flex; flex-direction: column; gap: 3px; }
+  .g-cat { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 999px; border: 1px solid transparent; background: none; cursor: pointer; text-align: left; color: #b4b8c6; transition: background .2s, color .2s, padding .2s; }
+  .g-cat:hover { background: rgba(255,255,255,.08); color: #fff; padding-left: 13px; }
+  .g-cat.on { background: rgba(255,255,255,.19); border-color: rgba(255,255,255,.25); color: #fff; }
+  .g-cat .ic { width: 14px; text-align: center; }
+  .g-cat small { margin-left: auto; color: #8b90a6; font-size: 12px; }
+  .g-sep { height: 1px; background: rgba(255,255,255,.11); margin: 6px 4px; }
+  .g-btns { margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; position: relative; }
+  .g-btns button { height: 30px; border-radius: 999px; border: 0; background: rgba(255,255,255,.09); cursor: pointer; color: #dadde6; transition: background .2s; }
+  .g-btns button:hover { background: rgba(255,255,255,.17); }
+  .g-tip { position: absolute; bottom: 36px; left: 0; right: 0; text-align: center; font-size: 12px; color: #fff; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .g-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .g-top { display: flex; gap: 6px; padding: 12px 14px 8px; align-items: center; }
+  .pill { height: 30px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.15); white-space: nowrap; }
+  .pill.soft { background: rgba(255,255,255,.09); }
+  .g-search { margin-left: auto; width: 34%; min-width: 150px; display: flex; align-items: center; gap: 8px; }
+  .g-search input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: #fff; font: inherit; }
+  .g-search input::placeholder { color: #7d8296; }
+  .g-search:focus-within { border-color: var(--accent); }
+  .g-cards { flex: 1; overflow-y: auto; padding: 4px 14px 14px; display: flex; gap: 10px; align-items: flex-start; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
+  .g-col { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .card {
+    border-radius: 14px; border: 1px solid rgba(255,255,255,.14);
+    background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.09));
+    transition: transform .2s, border-color .25s, box-shadow .25s; animation: pop .35s both;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } }
+  .card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.31); }
+  .card.on { border-color: rgba(255,255,255,.8); box-shadow: 0 0 22px -6px rgba(200,200,205,.55); }
+  .c-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 4px; cursor: pointer; }
+  .c-head .eye { color: #8b90a6; width: 14px; }
+  .card.on .c-head .eye { color: var(--accent-2); }
+  .c-head b { color: #fff; font-weight: 600; }
+  .c-head .d { width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .2s; }
+  .card.on .c-head .d { opacity: 1; }
+  .c-head .k { margin-left: auto; font-size: 11px; color: #7d8296; }
+  .c-desc { padding: 0 12px 8px; font-size: 11.5px; color: #a2a7b8; line-height: 1.4; }
+  .c-set { padding: 0 10px 10px; display: grid; gap: 5px; overflow: hidden; }
+  .card.col .c-set { display: none; }
+  .s-btn { height: 26px; border-radius: 999px; border: 1px solid rgba(255,255,255,.09); background: rgba(16,18,24,.35); color: #e8eaf0; font-size: 12px; cursor: pointer; transition: background .2s, border-color .2s; }
+  .s-btn:hover { background: rgba(16,18,24,.55); }
+  .s-btn.on { border-color: rgba(200,200,205,.65); color: #fff; }
+  .s-btn.off { color: #9da1b5; }
+  .s-num { display: flex; align-items: center; gap: 6px; height: 26px; font-size: 12px; }
+  .s-num .ap { color: #7d8296; }
+  .s-num .v { margin-left: auto; color: #fff; }
+  .s-num input { width: 40%; accent-color: #a1a1aa; height: 3px; }
+  .s-key { display: flex; justify-content: space-between; font-size: 11.5px; color: #7d8296; padding: 2px 4px 0; }
+  .g-foot { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-top: 1px solid rgba(255,255,255,.11); font-size: 12px; color: #b4b8c6; white-space: nowrap; overflow: hidden; }
+  .g-foot .cnt { color: #d4d4d8; }
+  .g-foot .bar { width: 60px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.19); overflow: hidden; }
+  .g-foot .bar i { display: block; height: 100%; background: linear-gradient(90deg, #71717a, #d4d4d8); transition: width .3s; }
+  .g-foot .hint { margin-left: auto; color: #7d8296; }
+  .g-empty { color: #9da1b5; padding: 30px; text-align: center; width: 100%; }
+  @media (max-width: 900px) {
+    .gw { grid-template-columns: 1fr; grid-template-rows: auto 1fr 30px; height: 640px; }
+    .g-side { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.13); }
+    #g-cats { flex-direction: row; }
+    .g-logo, .g-sep, .g-btns, .g-cat small, .g-side > .g-cat { display: none; }
+    .g-cat { flex: none; }
+    .g-top .pill.soft:not(.g-search) { display: none; }
+    .g-cards { flex-direction: column; }
+    .g-col { width: 100%; }
+    .g-foot .hint { display: none; }
+  }
+
+  /* ===== свои функции ===== */
+  .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
+  @media (max-width: 860px) { .feat { grid-template-columns: 1fr; } }
+  .f { padding: 30px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); min-height: 280px; display: flex; flex-direction: column; transition: border-color .25s; }
+  .f:hover { border-color: var(--line-2); }
+  .f.wide { grid-column: 1 / -1; }
+  .f .n { font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .f h3 { font-size: 40px; line-height: 1; margin-top: 10px; }
+  .f p { margin-top: 12px; color: #a9a6b4; max-width: 460px; }
+  .f .demo { margin-top: auto; padding-top: 24px; }
+  .os { aspect-ratio: 16 / 6; perspective: 700px; }
+  .os .scr { height: 100%; border-radius: 14px; border: 1px solid var(--line-2); background: linear-gradient(135deg, #18181b, #0a0a0b); transform: rotateY(-14deg) rotateX(4deg); padding: 10px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; box-shadow: 0 20px 60px -20px rgba(200,200,205,.5); }
+  .os .win { border-radius: 8px; background: rgba(255,255,255,.05); border: 1px solid var(--line); padding: 8px; font-size: 11px; color: var(--muted); }
+  .os .win b { color: var(--text); display: block; margin-bottom: 4px; font-size: 12px; }
+  .os .clock { font-size: 26px; color: #fff; }
+  .call { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.05); border: 1px solid var(--line); max-width: 380px; }
+  .call .ava { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a1a1aa); display: grid; place-items: center; font-weight: 700; position: relative; flex: none; }
+  .call .ava::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--accent); animation: ring 1.4s infinite; }
+  @keyframes ring { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
+  .call .who span { display: block; color: var(--muted); font-size: 13px; }
+  .call .act { margin-left: auto; display: flex; gap: 8px; }
+  .call .act i { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 18px; }
+  .wet { height: 140px; border-radius: 14px; overflow: hidden; position: relative; background: linear-gradient(#141416 0 50%, #08080a 50%); }
+  .wet .city { position: absolute; left: 0; right: 0; bottom: 50%; height: 60px; display: flex; align-items: flex-end; gap: 6px; padding: 0 14px; }
+  .wet .city i { flex: 1; background: linear-gradient(#a1a1aa, #3f3f46); border-radius: 3px 3px 0 0; }
+  .wet .city.mir { top: 50%; bottom: auto; align-items: flex-start; opacity: .35; filter: blur(1.5px); }
+  .wet .city.mir i { border-radius: 0 0 3px 3px; background: linear-gradient(#3f3f46, #a1a1aa); }
+  .wet .drop { position: absolute; width: 30px; height: 8px; border-radius: 50%; border: 1px solid rgba(220,220,225,.6); animation: drop 2s infinite; }
+  @keyframes drop { from { transform: scale(.2); opacity: 1; } to { transform: scale(2); opacity: 0; } }
+  .voice { display: flex; align-items: center; gap: 4px; height: 56px; }
+  .voice i { flex: 1; max-width: 6px; border-radius: 4px; background: var(--accent); animation: wave 1s ease-in-out infinite; }
+  @keyframes wave { 50% { transform: scaleY(.25); } }
+  .ice { display: flex; gap: 8px; align-items: flex-end; height: 100px; }
+  .ice i { width: 18px; background: linear-gradient(#f4f4f5, #a1a1aa 60%, #52525b); clip-path: polygon(50% 0, 100% 30%, 85% 100%, 15% 100%, 0 30%); opacity: .85; animation: shatter 3s ease-in-out infinite; }
+  @keyframes shatter { 70% { transform: none; opacity: .85; } 85% { transform: translateY(-30px) rotate(25deg); opacity: 0; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips span { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; color: #d8d6e0; }
+  .sp-demo { display: grid; gap: 8px; max-width: 420px; }
+  .sp-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; background: rgba(0,0,0,.45); border: 1px solid var(--line); font-size: 14px; }
+  .sp-row em { margin-left: auto; font-style: normal; color: var(--good); font-size: 12px; }
+  .sp { font-weight: 800; background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shift 3s linear infinite; }
+  @keyframes shift { to { background-position: 200% 0; } }
+
+  /* ===== демо плеера и текста песни ===== */
+  .mp { display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 18px; background: rgba(20,20,24,.9); border: 1px solid var(--line); max-width: 560px; }
+  .mp-cover { width: 64px; height: 64px; border-radius: 14px; flex: none; background: conic-gradient(from 0deg, #71717a, #a1a1aa, #a1a1aa, #71717a); animation: spin 8s linear infinite; }
+  .mp-cover.paused { animation-play-state: paused; }
+  @keyframes spin { to { filter: hue-rotate(360deg); } }
+  .mp-body { flex: 1; min-width: 0; }
+  .mp-top { display: flex; align-items: center; gap: 10px; }
+  .mp-top b { display: block; } .mp-top span { color: var(--muted); font-size: 13px; }
+  .mp-ctrl { margin-left: auto; display: flex; gap: 6px; }
+  .mp-ctrl button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,.06); cursor: pointer; font-size: 15px; }
+  .mp-ctrl button.big { width: 40px; height: 40px; background: #fff; color: #000; border-color: #fff; font-size: 13px; }
+  .mp input[type=range] { width: 100%; margin-top: 10px; accent-color: #fff; }
+  .mp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lyr { position: relative; height: 130px; margin-top: 14px; border-radius: 16px; overflow: hidden; background: radial-gradient(60% 80% at 50% 50%, rgba(200,200,205,.12), transparent), rgba(0,0,0,.35); border: 1px solid var(--line); }
+  .lyr .ln { position: absolute; font-weight: 800; font-size: clamp(22px, 3.4vw, 38px); white-space: nowrap; transform: translate(-50%, -50%); transition: opacity .6s, transform .6s; }
+  .lyr .ln.out { opacity: 0; transform: translate(-50%, -80%); }
+  .lyr .ln i { font-style: normal; display: inline-block; animation: up .25s both; }
+  @keyframes up { from { opacity: 0; transform: translateY(8px); } }
+
+  /* ===== скачать ===== */
+  .dl { margin: 44px auto 0; max-width: 640px; padding: 34px; border-radius: 24px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); text-align: center; }
+  .dl h3 { font-size: 48px; line-height: 1; }
+  .dl .meta { margin-top: 10px; color: var(--muted); }
+  .dl .actions { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .vt { color: var(--good); border-color: rgba(210,210,215,.35); }
+  .hash { margin-top: 16px; font: 11px ui-monospace, Consolas, monospace; color: var(--dim); word-break: break-all; }
+
+  /* ===== цены ===== */
+  .prices { margin: 44px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 860px; }
+  @media (max-width: 760px) { .prices { grid-template-columns: 1fr; } }
+  .price { padding: 32px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); display: flex; flex-direction: column; }
+  .price.hot { border-color: rgba(210,210,215,.45); background: radial-gradient(100% 80% at 100% 0%, rgba(210,210,215,.12), transparent 60%), var(--solid); }
+  .price .name { font-weight: 600; }
+  .price .sum { font-size: 72px; line-height: 1; margin-top: 14px; }
+  .price .sum small { font-family: Inter, sans-serif; font-size: 14px; color: var(--muted); }
+  .price ul { list-style: none; margin: 22px 0 26px; display: grid; gap: 10px; color: #cfcdd8; font-size: 14px; }
+  .price li::before { content: "—"; color: #52525b; margin-right: 10px; }
+  .price.hot li::before { color: #a1a1aa; }
+
+  /* надпись внизу с мягким свечением */
+  .outro { padding: 140px 0 120px; text-align: center; }
+  .outro h2 { font-size: clamp(44px, 8vw, 110px); line-height: .95; color: #e4e4e7;
+    text-shadow: 0 0 18px rgba(255,255,255,.25), 0 0 60px rgba(255,255,255,.12), 0 0 120px rgba(255,255,255,.06);
+    animation: breathe 6s ease-in-out infinite; }
+  .outro h2 em { color: #71717a; }
+  @keyframes breathe { 50% { text-shadow: 0 0 24px rgba(255,255,255,.35), 0 0 80px rgba(255,255,255,.16), 0 0 160px rgba(255,255,255,.08); } }
+  .outro p { margin-top: 18px; color: #52525b; font: 12px "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+  .price .btn { margin-top: auto; }
+
+  footer { border-top: 1px solid var(--line); padding: 40px 0; background: rgba(0,0,0,.6); }
+  footer .wrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  footer small { color: var(--muted); }
+  footer .social { margin-left: auto; display: flex; gap: 8px; }
+  footer .social svg { width: 16px; height: 16px; fill: currentColor; }
+
+  .modal { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.75); backdrop-filter: blur(6px); }
+  .modal.open { display: flex; animation: fade .2s; }
+  @keyframes fade { from { opacity: 0; } }
+  .box { width: 100%; max-width: 420px; padding: 30px; border-radius: 22px; background: #0c0b10; border: 1px solid var(--line-2); position: relative; }
+  .box h3 { font-size: 34px; line-height: 1; }
+  .box .sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .box .x { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--muted); cursor: pointer; font-size: 18px; }
+  .tabs { display: flex; gap: 4px; margin-top: 20px; padding: 4px; border-radius: 999px; border: 1px solid var(--line); }
+  .tabs button { flex: 1; height: 36px; border: 0; border-radius: 999px; background: none; color: var(--muted); font-weight: 600; cursor: pointer; }
+  .tabs button.on { background: #fff; color: #000; }
+  form { margin-top: 18px; display: grid; gap: 12px; }
+  label { font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
+  form input:not([type=radio]) { height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: #050507; color: var(--text); font: 15px Inter, sans-serif; outline: none; }
+  form input:focus { border-color: var(--accent); }
+  .opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); cursor: pointer; color: var(--text); }
+  .opt input { accent-color: var(--gold); }
+  .opt span { margin-left: auto; color: var(--gold); font-weight: 700; }
+  .note { font-size: 13px; color: var(--accent-2); text-align: center; min-height: 18px; }
+
+  .rv { opacity: 0; transform: translateY(26px); transition: opacity .7s, transform .7s; }
+  .rv.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<div id="words"></div>
+<canvas id="fire"></canvas>
+<div id="glow"></div>
+
+<header id="hdr">
+  <div class="wrap nav">
+    <a class="logo" href="#top"><i></i>FixVisual</a>
+    <nav>
+      <a href="#menu">Меню</a>
+      <a href="#features">Функции</a>
+      <a href="#download">Скачать</a>
+      <a href="#prices">Цены</a>
+    </nav>
+    <div class="right">
+      <button class="btn" data-open="auth" data-tab="login">Войти</button>
+      <button class="btn white" data-open="auth" data-tab="register">Регистрация</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <span class="tag"><i></i>Бесплатный визуал</span>
+      <h1 class="serif">Визуал, за который<br><em>не банят</em></h1>
+      <div class="vs">Выбери бесплатный визуал, а не <s>запрещённые читы</s></div>
+      <p>Только красота: эффекты, HUD, небо, косметика, звонки и компьютер в игре. Никакого преимущества в бою — играй на любом сервере спокойно.</p>
+      <div class="cta">
+        <a class="btn white big" href="#download">Скачать бесплатно ↓</a>
+        <a class="btn big" href="#menu">Открыть меню</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="stats rv">
+      <div><b class="serif" data-count="70" data-plus>0</b><span>функций</span></div>
+      <div><b class="serif" data-count="6">0</b><span>категорий в меню</span></div>
+      <div><b class="serif" data-count="14">0</b><span>модов оптимизации внутри</span></div>
+      <div><b class="serif">0 ₽</b><span>навсегда</span></div>
+    </div>
+  </div>
+
+  <section id="menu">
+    <div class="wrap">
+      <div class="center rv">
+        <div class="kicker">Меню</div>
+        <h2 class="serif title">То самое меню из игры</h2>
+        <p class="lead">ЛКМ по названию — вкл/выкл, ПКМ — свернуть, СКМ — клавиша. Режимы листаются кликом, поиск — просто печатай.</p>
+      </div>
+      <div class="scene-wrap rv"><div class="scene">
+        <div class="gw" id="gw">
+          <div class="g-side">
+            <div class="g-logo"><b>FixVisual</b></div>
+            <div id="g-cats"></div>
+            <div class="g-sep"></div>
+            <button class="g-cat" data-tab="1"><span class="ic" style="color:#d4d4d8">⚑</span>Метки<small>3</small></button>
+            <button class="g-cat" data-tab="2"><span class="ic" style="color:#d4d4d8">☺</span>Друзья<small>2</small></button>
+            <div class="g-btns">
+              <div class="g-tip" id="g-tip"></div>
+              <button data-tip="Редактор HUD">✥</button><button data-tip="Конфиги">▤</button><button data-tip="Гардероб">♥</button>
+            </div>
+          </div>
+          <div class="g-main">
+            <div class="g-top">
+              <span class="pill" id="g-title"></span>
+              <span class="pill soft" id="g-count"></span>
+              <label class="pill soft g-search">⌕<input id="g-q" placeholder="Поиск — просто печатай"></label>
+            </div>
+            <div class="g-cards" id="g-cards"></div>
+          </div>
+          <div class="g-foot">
+            Player &nbsp;|&nbsp; <span class="cnt" id="g-on"></span><span class="bar"><i id="g-bar"></i></span>
+            <span class="hint">ЛКМ — вкл/выкл · ПКМ — свернуть · СКМ — клавиша &nbsp; FixVisual 3.1</span>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="rv">
+        <div class="kicker">Только в FixVisual</div>
+        <h2 class="serif title">Такого нет больше нигде</h2>
+        <p class="lead">Функции, которые мы сделали сами с нуля.</p>
+      </div>
+      <div class="feat">
+        <div class="f wide rv">
+          <span class="n">01</span>
+          <h3 class="serif">FixOS</h3>
+          <p>Компьютер прямо в мире. Изогнутый экран перед глазами: окна, музыка, часы и настоящий браузер. Размер — колёсиком. Друзья с FixVisual видят твой экран перед твоей головой.</p>
+          <div class="demo os"><div class="scr">
+            <div class="win"><b>Браузер</b>youtube.com · гайды по PvP</div>
+            <div class="win"><b>Часы</b><div class="clock serif">23:47</div>Музыка: Lo-fi radio ▸</div>
+          </div></div>
+        </div>
+        <div class="f rv">
+          <span class="n">02</span>
+          <h3 class="serif">Fix Calls</h3>
+          <p>Звонки друзьям прямо в игре, без Discord. Входящий всплывает карточкой: принять или сбросить. Свои рингтоны.</p>
+          <div class="demo"><div class="call">
+            <div class="ava">S</div>
+            <div class="who"><b>Steve_PvP</b><span>Входящий звонок…</span></div>
+            <div class="act"><i style="background:var(--bad)">✕</i><i style="background:var(--good)">✆</i></div>
+          </div></div>
+        </div>
+        <div class="f rv">
+          <span class="n">03</span>
+          <h3 class="serif">Sponsor</h3>
+          <p>Префикс «Спонсор» в табе и над ником, переливается градиентом — 9 на выбор. Включён сразу, выключается в меню. Поменяй градиент в меню выше, в «Косметике».</p>
+          <div class="demo sp-demo" id="sp-demo"></div>
+        </div>
+        <div class="f rv">
+          <span class="n">04</span>
+          <h3 class="serif">Мокрый пол</h3>
+          <p>В дождь пол становится зеркалом: отражает мир и игроков, по лужам расходятся круги. Прозрачность — ползунком.</p>
+          <div class="demo"><div class="wet">
+            <div class="city"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
+            <div class="city mir"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
+            <span class="drop" style="left:20%;top:70%"></span><span class="drop" style="left:60%;top:80%;animation-delay:-.7s"></span><span class="drop" style="left:80%;top:62%;animation-delay:-1.3s"></span>
+          </div></div>
+        </div>
+        <div class="f rv">
+          <span class="n">05</span>
+          <h3 class="serif">Голосовой помощник</h3>
+          <p>«Фикс, включи небо» — и он включит. Пишет в чат, заходит на сервер, отвечает голосом. Работает офлайн.</p>
+          <div class="demo"><div class="voice" id="voice"></div></div>
+        </div>
+        <div class="f rv">
+          <span class="n">06</span>
+          <h3 class="serif">Kill Effects</h3>
+          <p>После убийства противник замерзает в лёд вместе с моделью, а кристаллы разлетаются. Ещё пепел и разрыв.</p>
+          <div class="demo"><div class="ice">
+            <i style="height:50%"></i><i style="height:80%;animation-delay:-.3s"></i><i style="height:100%;animation-delay:-.6s"></i><i style="height:70%;animation-delay:-.2s"></i><i style="height:90%;animation-delay:-.5s"></i><i style="height:55%;animation-delay:-.8s"></i><i style="height:75%;animation-delay:-.4s"></i>
+          </div></div>
+        </div>
+        <div class="f wide rv">
+          <span class="n">07</span>
+          <h3 class="serif">Косметика и Тренер</h3>
+          <p>Крылья, шапки, рюкзаки, ангел и демон на плечах, эмоции — видят все с FixVisual. А в одиночном мире — бот-соперник: криты, перлы, бафы, три сложности.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>20 видов крыльев</span><span>Драконьи</span><span>Кристальные</span><span>Сакура</span><span>Кибер</span><span>Джетпак</span><span>Пингвин</span><span>Корона</span><span>Нимб</span><span>Тренер: Mace</span><span>Перекрит</span><span>Вагонетки</span></div>
+        </div>
+        <div class="f wide rv">
+          <span class="n">08</span>
+          <h3 class="serif">Музыка и текст песни</h3>
+          <p>Своя музыка из папки, YouTube, Spotify или Яндекс Музыка — прямо в игре. Островок с обложкой сверху экрана, на M — плеер с очередью. Музыку можно ставить на паузу и перематывать. А Lyrics показывает текст песни: строки всплывают буква за буквой с градиентом. Попробуй ниже.</p>
+          <div class="demo">
+            <div class="mp">
+              <div class="mp-cover" id="mp-cover"></div>
+              <div class="mp-body">
+                <div class="mp-top"><div><b>Neon Nights</b><span>FixVisual · демо</span></div>
+                  <div class="mp-ctrl">
+                    <button id="mp-back" title="Назад 10 с">⟲</button>
+                    <button id="mp-play" class="big" title="Пауза / играть">❚❚</button>
+                    <button id="mp-fwd" title="Вперёд 10 с">⟳</button>
+                  </div>
+                </div>
+                <input type="range" id="mp-seek" min="0" max="120" step="0.1" value="0">
+                <div class="mp-time"><span id="mp-cur">0:00</span><span>2:00</span></div>
+              </div>
+            </div>
+            <div class="lyr" id="lyr"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap">
+      <div class="center rv">
+        <div class="kicker">Скачать</div>
+        <h2 class="serif title">Бесплатно. Без вирусов.</h2>
+        <p class="lead">Проверено на VirusTotal — открой ссылку и убедись сам.</p>
+      </div>
+      <div class="dl rv">
+        <h3 class="serif">FixVisual Launcher</h3>
+        <p class="meta">Windows · 123 МБ · сам ставит игру, мод и обновления</p>
+        <div class="actions">
+          <a class="btn white big" href="https://github.com/konikz2/FixVisual-updates/releases/latest/download/FixVisualLauncher-Setup.exe">Скачать лаунчер</a>
+          <a class="btn big vt" target="_blank" rel="noopener" href="https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL2tvbmlrejIvRml4VmlzdWFsLXVwZGF0ZXMvcmVsZWFzZXMvbGF0ZXN0L2Rvd25sb2FkL0ZpeFZpc3VhbExhdW5jaGVyLVNldHVwLmV4ZQ">VirusTotal ✓</a>
+        </div>
+        <p class="hash">SHA-256 673a6dc2836ddcc5c2fae28b8b742d290131841d63212d4932f5ea2e90d86a43</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="prices">
+    <div class="wrap">
+      <div class="center rv">
+        <div class="kicker">Цены</div>
+        <h2 class="serif title">Всё бесплатно. Почти.</h2>
+        <p class="lead">Визуал бесплатный навсегда. Хочешь новинки раньше всех — поддержи проект.</p>
+      </div>
+      <div class="prices">
+        <div class="price rv">
+          <div class="name">FixVisual</div>
+          <div class="sum serif">0 ₽ <small>навсегда</small></div>
+          <ul><li>Все 70+ функций</li><li>Меню, HUD, косметика</li><li>Звонки и FixOS</li><li>Автообновления</li></ul>
+          <a class="btn" href="#download">Скачать</a>
+        </div>
+        <div class="price hot rv">
+          <div class="name">Спонсор · бета-тест</div>
+          <div class="sum serif">99 ₽ <small>навсегда</small></div>
+          <ul><li>Новые функции раньше всех</li><li>Функция Sponsor: префикс в табе и над ником</li><li>9 градиентов на выбор</li><li>Поддержка разработки</li></ul>
+          <button class="btn gold" data-open="buy">Купить за 99 ₽</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="outro">
+    <div class="wrap">
+      <h2 class="serif rv">Изменись<br><em>в лучшую сторону</em></h2>
+      <p class="rv">FixVisual · без читов · без банов</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#top"><i></i>FixVisual</a>
+    <small>Бесплатный визуал для Minecraft. Не является читом.</small>
+    <div class="social">
+      <a class="btn" href="#"><svg viewBox="0 0 24 24"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.2 1.8 11.7c-1-.3-1-1 .2-1.5L20.6 3c.9-.3 1.6.2 1.3 1.3Z"/></svg>Telegram</a>
+      <a class="btn" href="#"><svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.6 1.3a18.4 18.4 0 0 0-5.6 0L8.6 3a19.7 19.7 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18.1A19.9 19.9 0 0 0 6.2 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12 0l.5.4c-.6.4-1.3.7-2 1l1.3 2.1a19.8 19.8 0 0 0 6.1-2.9c.5-5.2-.8-9.7-3.6-13.7ZM8 15.4c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.6 8 10.6s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>Discord</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal" id="auth">
+  <div class="box">
+    <button class="x" data-close>×</button>
+    <h3 class="serif">Аккаунт FixVisual</h3>
+    <p class="sub">Один аккаунт для сайта, лаунчера и игры</p>
+    <div class="tabs"><button data-auth="login">Вход</button><button data-auth="register">Регистрация</button></div>
+    <form data-form="login">
+      <label>Ник или почта<input required autocomplete="username"></label>
+      <label>Пароль<input type="password" required autocomplete="current-password"></label>
+      <button class="btn white">Войти</button>
+      <p class="note"></p>
+    </form>
+    <form data-form="register" hidden>
+      <label>Ник в Minecraft<input required maxlength="16"></label>
+      <label>Почта<input type="email" required autocomplete="email"></label>
+      <label>Пароль<input type="password" required minlength="6" autocomplete="new-password"></label>
+      <button class="btn white">Создать аккаунт</button>
+      <p class="note"></p>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="buy">
+  <div class="box">
+    <button class="x" data-close>×</button>
+    <h3 class="serif">Спонсор · 99 ₽</h3>
+    <p class="sub">Ранний доступ к обновлениям и функция Sponsor — префикс градиентом в табе</p>
+    <form data-form="buy">
+      <label>Ник в Minecraft<input required maxlength="16"></label>
+      <label class="opt"><input type="radio" name="pay" checked> Карта<span>99 ₽</span></label>
+      <label class="opt"><input type="radio" name="pay"> СБП<span>99 ₽</span></label>
+      <button class="btn gold">Перейти к оплате</button>
+      <p class="note"></p>
+    </form>
+  </div>
+</div>
+
+<script>
+  const $ = s => document.querySelector(s);
+
+  // ===================== меню — как в моде =====================
+  // модуль: [имя, описание, включён, клавиша, настройки]
+  // настройки: ['m', имя, [варианты]] — режим, ['b', имя, вкл] — да/нет, ['n', имя, значение, мин, макс, шаг]
+  const CATS = [
+    { name: 'Интерфейс', icon: '■', color: '#a1a1aa', mods: [
+      ['Watermark', 'Название, FPS, пинг и время в углу экрана', 1, 'n/a', [['m', 'Стиль', ['Плитки', 'Полоса', 'Минимум']], ['b', 'Пинг', 1], ['b', 'Время', 1]]],
+      ['ArrayList', 'Список включённых функций справа', 1, 'n/a', [['m', 'Сортировка', ['По длине', 'По алфавиту']], ['b', 'Фон', 1], ['n', 'Размер', 1, .5, 2, .05]]],
+      ['TargetHUD', 'Здоровье и броня противника во время боя', 1, 'n/a', [['m', 'Стиль', ['Стекло', 'Компакт']], ['b', 'Броня', 1]]],
+      ['Keybinds', 'Какие функции на каких клавишах', 1, 'n/a', [['b', 'Только включённые', 0]]],
+      ['Potions', 'Активные эффекты с таймером', 1, 'n/a', [['b', 'Иконки', 1]]],
+      ['Friend List', 'Друзья: в сети зелёные, не в сети красные', 1, 'n/a', [['b', 'Сервер друга', 1]]],
+      ['Music', 'Островок с музыкой: своя музыка из папок или из браузера/Spotify. M — меню с очередью', 1, 'M', []],
+      ['Notifications', 'Уведомления о переключении модулей', 1, 'n/a', []],
+      ['Keystrokes', 'Нажатые клавиши и CPS', 0, 'n/a', [['b', 'CPS', 1]]],
+      ['Item Counter', 'Сколько перлов, яблок и тотемов', 0, 'n/a', []] ] },
+    { name: 'Мир', icon: '✦', color: '#d4d4d8', mods: [
+      ['CustomSky', 'Небо: сияния своих цветов, галактика, лучи Энда, космос — чёрная дыра, Сатурн, Луна и все планеты', 1, 'n/a', [['m', 'Вид', ['Чёрная дыра', 'Сатурн', 'Радуга', 'Галактика', 'Дымка']], ['n', 'Яркость', .8, 0, 1, .05], ['b', 'Свечение неба', 1]]],
+      ['TargetESP', 'Эффект вокруг текущей цели', 1, 'R', [['m', 'Вид', ['Призраки', 'Кольцо', 'Сфера']], ['n', 'Скорость', 1, .2, 3, .1]]],
+      ['JumpCircles', 'Расходящиеся круги под ногами при прыжке', 1, 'n/a', [['n', 'Размер', 1.2, .5, 3, .1]]],
+      ['Trails', 'Плавный светящийся след: комета, лента, спираль, искры', 1, 'n/a', [['m', 'Вид', ['Комета', 'Лента', 'Спираль', 'Искры']], ['n', 'Длина', 20, 5, 60, 1]]],
+      ['HitParticles', 'Светящиеся частицы при ударе', 1, 'n/a', [['m', 'Форма', ['Звёзды', 'Сердечки', 'Искры']], ['n', 'Количество', 12, 2, 40, 1]]],
+      ['Rain', 'Дождь: мокрый пол с отражением неба и кругами от капель, неоновые струи или снег', 1, 'n/a', [['m', 'Вид', ['Мокрый пол', 'Капли', 'Снежинки']], ['b', 'Зеркальный пол', 1], ['n', 'Прозрачность пола', 0, 0, .95, .05], ['n', 'Радиус', 20, 6, 40, 1]]],
+      ['Lyrics', 'Текст песни в мире перед глазами: строки появляются буква за буквой, градиент на выбор (трек из Music)', 1, 'n/a', [['m', 'Градиент', ['Тема', 'Золото', 'Закат', 'Неон', 'Океан', 'Сакура', 'Токсик', 'Кровь', 'Лёд', 'Радуга', 'Белый']], ['n', 'Размер', 1, .4, 2.5, .05], ['n', 'Расстояние', 5, 2.5, 12, .5], ['b', 'Свечение', 1], ['b', 'Разбросать', 1]]],
+      ['KillEffects', 'Красивые эффекты при убийстве', 1, 'n/a', [['m', 'Эффект', ['Заморозка', 'Пепел', 'Разрыв']]]],
+      ['EchoMotion', 'Призрак противника: обводка всей модели на месте удара, поднимается и тает', 0, 'n/a', [['n', 'Время', 1, .3, 3, .1]]],
+      ['World Mood', 'Цветокоррекция, оттенок неба и тумана — киберпанк, холодная ночь, плёнка 90-х, кино', 0, 'n/a', [['m', 'Настроение', ['Киберпанк', 'Ночь', 'Плёнка 90-х', 'Кино']]]],
+      ['Shaders', 'Встроенные шейдеры (Iris): Complementary, BSL, MakeUp, Solas', 0, 'n/a', [['m', 'Пак', ['Complementary', 'BSL', 'MakeUp', 'Solas']]]],
+      ['Waypoints', 'Метки: овал поверх тумана с названием, расстоянием и друзьями', 1, 'N', [['b', 'Сквозь стены', 1]]],
+      ['Wind', 'Ветер: светящиеся дуги вырастают из земли и закручиваются в воздухе', 0, 'n/a', []] ] },
+    { name: 'Игрок', icon: '☻', color: '#d4d4d8', mods: [
+      ['SwingAnimations', 'Анимации удара как в PvP-клиентах', 1, 'n/a', [['m', 'Анимация', ['Smooth', 'Exhibition', 'Old', 'Spin']], ['n', 'Скорость', 1, .3, 2, .05]]],
+      ['ViewModel', 'Положение и размер предмета в правой и левой руке', 1, 'n/a', [['n', 'Размер', 1, .5, 1.5, .05], ['n', 'Сдвиг X', 0, -1, 1, .05]]],
+      ['Predict', 'Линия полёта жемчуга, трезубца, снежков, зелий и стрел, точка попадания и время до неё', 1, 'V', [['b', 'Чужие перлы', 1], ['b', 'Красная по игроку', 1]]],
+      ['Combo', 'Счётчик критов подряд: цветные «×N КРИТ» рядом с противником', 1, 'n/a', []],
+      ['HitSound', 'Свой звук ударов: 54 звука — голоса, PvP-классика, аниме, 8-бит', 1, 'n/a', [['m', 'Звук', ['Тянка — случайно', 'PvP', 'Аниме', '8-бит', 'Мемы']], ['n', 'Громкость', .8, 0, 1, .05]]],
+      ['FixOnline', 'Меню и FixOS видны другим перед твоей головой; звонки (Fix Calls), рингтоны', 1, 'n/a', [['m', 'Рингтон', ['Классика', 'Lo-fi', 'Аниме']], ['b', 'Звонки', 1]]],
+      ['Friend Track', 'Уведомления: друг запустил игру или зашёл на сервер', 1, 'n/a', []],
+      ['FreeLook', 'Осмотреться вокруг, не меняя направление взгляда', 0, 'LALT', []],
+      ['Global', 'Общий чат игроков FixVisual: «.global сообщение»', 1, 'n/a', []] ] },
+    { name: 'Прочее', icon: '✚', color: '#e4e4e7', mods: [
+      ['FixOS', 'Компьютер в мире: окна, музыка, часы, сайты (клавиша O)', 1, 'O', [['n', 'Размер', 1, .5, 2, .05], ['b', 'Наклон к глазам', 1]]],
+      ['VoiceAssistant', 'Голосовой помощник: «Фикс, включи…», «Фикс, напиши в чат…», «Фикс, зайди на…»', 0, 'n/a', [['m', 'Голос', ['Ксения', 'Байя', 'Евгений']]]],
+      ['FakePlayer', 'Фейковый игрок: стоит, повторяет, зеркалит или тренирует тебя в одиночном мире', 0, 'J', [['m', 'Сложность', ['Лёгкий', 'Средний', 'Сложный']], ['m', 'Кит', ['Mace — Пробитие', 'Перекрит', 'Вагонетки']]]],
+      ['Streamer Mode', 'Ники заменяются, скрыты скорборд, шапка таба, координаты и IP', 0, 'n/a', []],
+      ['Removals', 'Выбор, что убрать: огонь, воду, тряску, боссбар…', 1, 'n/a', [['b', 'Огонь на экране', 1], ['b', 'Тряска', 1]]],
+      ['Optimization', 'Меньше частиц и мобов вдали — больше FPS', 1, 'n/a', []] ] },
+    { name: 'Косметика', icon: '♥', color: '#a1a1aa', mods: [
+      ['Sponsor', 'Префикс «Спонсор» в табе и над ником — градиент на выбор', 1, 'n/a', [['m', 'Градиент', ['Золото', 'Закат', 'Неон', 'Океан', 'Сакура', 'Токсик', 'Кровь', 'Лёд', 'Радуга']], ['b', 'Над головой', 1]]],
+      ['Wings', 'Пиксельные крылья за спиной — машут и отклоняются от движения', 1, 'n/a', [['m', 'Вид', ['Драконьи', 'Кристальные', 'Сакура', 'Кибер', 'Ангел', 'Демон']]]],
+      ['Hats', 'Пиксельные шапки: рога, капюшон, ведьмина шляпа, нимб, корона', 0, 'n/a', [['m', 'Шапка', ['Корона', 'Нимб', 'Рога']]]],
+      ['Backpack', 'Пиксельный рюкзак-игрушка на спине', 1, 'n/a', [['m', 'Рюкзак', ['Джетпак', 'Пингвин', 'Панда', 'Дракон']]]],
+      ['Shoulders', 'Ангел и дьявол сидят у тебя на плечах', 0, 'n/a', []],
+      ['Emotes', 'Танцы и прыжки: колесо эмоций по клавише', 0, 'B', []] ] },
+    { name: 'Тема', icon: '●', color: '#a1a1aa', mods: [
+      ['Тема', 'Цвета и стиль всего клиента', 1, 'n/a', [['m', 'Цвет', ['Фиолетовая', 'Океан', 'Закат', 'Монохром']], ['m', 'Меню', ['Стекло', 'Колонки']]]] ] }
+  ];
+  // у режимов — номер выбранного варианта
+  CATS.forEach(c => c.mods.forEach(m => m[4].forEach(s => { if (s[0] === 'm') s[3] = 0; })));
+
+  let cur = CATS[1], query = '';
+  const collapsed = new Set();
+  const all = () => CATS.flatMap(c => c.mods);
+
+  function drawCats() {
+    $('#g-cats').innerHTML = '';
+    CATS.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'g-cat' + (c === cur && !query ? ' on' : '');
+      b.innerHTML = `<span class="ic" style="color:${c.color}">${c.icon}</span>${c.name}<small>${c.mods.length}</small>`;
+      b.onclick = () => { cur = c; query = ''; $('#g-q').value = ''; draw(); };
+      $('#g-cats').appendChild(b);
+    });
+  }
+
+  function setRow(s, m) {
+    if (s[0] === 'm') {
+      const b = document.createElement('button');
+      b.className = 's-btn';
+      const paint = () => { b.textContent = `${s[1]}: ${s[2][s[3]]}`; if (m[0] === 'Sponsor') spDemo(); };
+      paint();
+      b.onclick = () => { s[3] = (s[3] + 1) % s[2].length; paint(); };
+      b.oncontextmenu = e => { e.preventDefault(); s[3] = (s[3] - 1 + s[2].length) % s[2].length; paint(); };
+      return b;
+    }
+    if (s[0] === 'b') {
+      const b = document.createElement('button');
+      const paint = () => { b.className = 's-btn ' + (s[2] ? 'on' : 'off'); b.textContent = `${s[1]}: ${s[2] ? 'Вкл' : 'Выкл'}`; };
+      paint();
+      b.onclick = () => { s[2] = s[2] ? 0 : 1; paint(); };
+      return b;
+    }
+    const d = document.createElement('div');
+    d.className = 's-num';
+    const fmt = v => (s[5] < 1 ? (+v).toFixed(2) : v);
+    d.innerHTML = `<span class="ap">≈</span>${s[1]}<span class="v">${fmt(s[2])}</span><input type="range" min="${s[3]}" max="${s[4]}" step="${s[5]}" value="${s[2]}">`;
+    d.querySelector('input').oninput = e => { s[2] = e.target.value; d.querySelector('.v').textContent = fmt(s[2]); };
+    return d;
+  }
+
+  function card(m, i) {
+    const el = document.createElement('div');
+    el.className = 'card' + (m[2] ? ' on' : '') + (collapsed.has(m[0]) ? ' col' : '');
+    el.style.animationDelay = i * 45 + 'ms';
+    el.innerHTML = `<div class="c-head"><span class="eye">${m[2] ? '◉' : '◎'}</span><b>${m[0]}</b><span class="d"></span><span class="k">${m[3]}</span></div><div class="c-desc">${m[1]}</div><div class="c-set"></div>`;
+    const head = el.querySelector('.c-head');
+    head.onclick = () => { m[2] = m[2] ? 0 : 1; el.classList.toggle('on', !!m[2]); head.querySelector('.eye').textContent = m[2] ? '◉' : '◎'; counts(); };
+    head.oncontextmenu = e => { e.preventDefault(); collapsed.has(m[0]) ? collapsed.delete(m[0]) : collapsed.add(m[0]); el.classList.toggle('col'); };
+    // СКМ — назначить клавишу
+    head.onmousedown = e => { if (e.button === 1) e.preventDefault(); };
+    head.onauxclick = e => {
+      if (e.button !== 1) return;
+      const k = head.querySelector('.k');
+      k.textContent = 'нажми клавишу…';
+      addEventListener('keydown', ev => { ev.preventDefault(); m[3] = ev.key === 'Escape' ? 'n/a' : ev.key.toUpperCase(); k.textContent = m[3]; el.querySelector('.s-key span:last-child').textContent = m[3]; }, { once: true });
+    };
+    const set = el.querySelector('.c-set');
+    m[4].forEach(s => set.appendChild(setRow(s, m)));
+    const key = document.createElement('div');
+    key.className = 's-key';
+    key.innerHTML = `<span>⌨ Клавиша</span><span>${m[3]}</span>`;
+    set.appendChild(key);
+    return el;
+  }
+
+  const found = () => all().filter(m => (m[0] + ' ' + m[1]).toLowerCase().includes(query.toLowerCase()));
+
+  function counts() {
+    const list = query ? found() : cur.mods;
+    $('#g-count').textContent = `● ${list.filter(m => m[2]).length}   ◌ ${list.length}`;
+    const on = all().filter(m => m[2]).length, total = all().length;
+    $('#g-on').textContent = `Включено ${on} из ${total}`;
+    $('#g-bar').style.width = on / total * 100 + '%';
+  }
+
+  function draw() {
+    drawCats();
+    $('#g-title').textContent = query ? '⌕  Поиск' : `${cur.icon}  ${cur.name}`;
+    const list = query ? found() : cur.mods;
+    const box = $('#g-cards');
+    box.innerHTML = '';
+    if (!list.length) { box.innerHTML = '<div class="g-empty">Ничего не нашлось</div>'; counts(); return; }
+    const cols = [document.createElement('div'), document.createElement('div')];
+    cols.forEach(c => { c.className = 'g-col'; box.appendChild(c); });
+    // раскладка по двум колонкам — в более короткую, как в игре
+    const h = [0, 0];
+    list.forEach((m, i) => {
+      const k = h[0] <= h[1] ? 0 : 1;
+      cols[k].appendChild(card(m, i));
+      h[k] += 80 + m[1].length * .6 + m[4].length * 31;
+    });
+    box.scrollTop = 0;
+    counts();
+  }
+
+  $('#g-q').oninput = e => { query = e.target.value.trim(); draw(); };
+  document.querySelectorAll('.g-side > .g-cat').forEach(b => b.onclick = () => { $('#g-q').value = 'Friend'; query = 'Friend'; draw(); });
+  document.querySelectorAll('.g-btns button').forEach(b => {
+    b.onmouseenter = () => { $('#g-tip').textContent = b.dataset.tip; $('#g-tip').style.opacity = 1; };
+    b.onmouseleave = () => $('#g-tip').style.opacity = 0;
+  });
+
+  // ===================== демо префикса «Спонсор» =====================
+  const GRADS = {
+    'Золото': ['#f5c542', '#ff8a00'], 'Закат': ['#ff5f6d', '#ffc371'], 'Неон': ['#a855f7', '#22d3ee'], 'Океан': ['#2563eb', '#22d3ee'],
+    'Сакура': ['#f472b6', '#fbcfe8'], 'Токсик': ['#84cc16', '#22c55e'], 'Кровь': ['#b91c1c', '#f87171'], 'Лёд': ['#e0f2fe', '#38bdf8'],
+    'Радуга': ['#f87171', '#facc15', '#4ade80', '#22d3ee', '#a855f7']
+  };
+  function spDemo() {
+    const s = CATS[4].mods[0][4][0];
+    const rows = [[s[2][s[3]], 'konikz2', 12], ['Неон', 'Steve_PvP', 34], [null, 'Alex', 41]];
+    $('#sp-demo').innerHTML = rows.map(([g, n, ms]) => {
+      const c = g ? GRADS[g] : null;
+      const pre = c ? `<span class="sp" style="background-image:linear-gradient(90deg,${[...c, ...c].join(',')})">Спонсор</span>` : '';
+      return `<div class="sp-row"><span style="color:#d4d4d8">◉</span>${pre}${n}<em>${ms} ms</em></div>`;
+    }).join('');
+  }
+  draw();
+  spDemo();
+
+  $('#voice').innerHTML = Array.from({ length: 40 }, (_, i) => `<i style="height:${20 + Math.abs(Math.sin(i * .7)) * 80}%;animation-delay:${-i * .05}s"></i>`).join('');
+
+  // ===================== демо: музыка (синтез в браузере), пауза, перемотка, текст песни =====================
+  (function player() {
+    const LEN = 120, BPM = 96, BEAT = 60 / BPM;
+    // аккорды по 2 такта: Am – F – C – G
+    const CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
+    const LYR = [
+      [0, 'Включай FixVisual'], [6, 'Небо горит фиолетовым'], [12, 'Пол как зеркало под дождём'], [18, 'Друзья звонят прямо в игре'],
+      [24, 'Ни одного бана'], [30, 'Только красота'], [36, 'FixOS перед глазами'], [42, 'Лёд разлетается на куски'],
+      [48, 'Крылья за спиной'], [54, 'Музыка не кончается'], [60, 'Перемотай назад'], [66, 'Поставь на паузу'],
+      [72, 'Включай FixVisual'], [78, 'Небо горит фиолетовым'], [84, 'Семьдесят функций'], [90, 'Бесплатно навсегда'],
+      [96, 'Только визуал'], [102, 'Никаких читов'], [108, 'Скачай лаунчер'], [114, 'И заходи']];
+    const GR = [['#a1a1aa', '#a1a1aa'], ['#e4e4e7', '#71717a'], ['#a1a1aa', '#fbcfe8'], ['#ff5f6d', '#ffc371'], ['#2563eb', '#a1a1aa']];
+    let ac = null, master = null, playing = false, pos = 0, startAt = 0, nextNote = 0, timer = null, lastLine = -1, drag = false;
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    const now = () => playing ? Math.min(LEN, (ac.currentTime - startAt)) : pos;
+    function note(m, t, dur, type, vol) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = hz(m);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .05);
+    }
+    function kick(t) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(40, t + .15);
+      g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .2);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + .25);
+    }
+    // ноты по шестнадцатым: что звучит в момент песни s
+    function step(s, when) {
+      const sixteenth = Math.round(s / (BEAT / 4));
+      const bar = Math.floor(s / (BEAT * 4)), ch = CH[Math.floor(bar / 2) % 4];
+      const i = sixteenth % 16;
+      if (i === 0) ch.forEach(m => note(m, when, BEAT * 8, 'sine', .07));
+      if (i % 4 === 0) kick(when);
+      if (s > 6) note(ch[[0, 1, 2, 1][(sixteenth >> 1) % 4]] + 12, when, BEAT * .45, 'triangle', .05);
+      if (i % 8 === 4) note(ch[0] - 12, when, BEAT * 1.5, 'sawtooth', .025);
+    }
+    function schedule() {
+      const s = now();
+      while (nextNote < s + .2) {
+        if (nextNote >= s - .05) step(nextNote, startAt + nextNote);
+        nextNote += BEAT / 4;
+      }
+      if (s >= LEN) { pause(); pos = 0; render(); }
+    }
+    function play() {
+      if (!ac) { ac = new AudioContext(); master = ac.createGain(); master.gain.value = .8; master.connect(ac.destination); }
+      ac.resume();
+      startAt = ac.currentTime - pos; nextNote = Math.ceil(pos / (BEAT / 4)) * (BEAT / 4);
+      clearInterval(timer);
+      playing = true; timer = setInterval(schedule, 40);
+      $('#mp-play').textContent = '❚❚'; $('#mp-cover').classList.remove('paused');
+    }
+    function pause() {
+      if (playing) pos = now();
+      playing = false; clearInterval(timer);
+      // звук обрывается сразу: останавливаем весь аудиодвижок и отключаем уже запланированные ноты и аккорды
+      if (ac) {
+        ac.suspend();
+        master.disconnect();
+        master = ac.createGain(); master.gain.value = .8; master.connect(ac.destination);
+      }
+      $('#mp-play').textContent = '▶'; $('#mp-cover').classList.add('paused');
+    }
+    function seek(s) {
+      const was = playing;
+      if (was) pause();
+      pos = Math.max(0, Math.min(LEN - .1, s)); lastLine = -1;
+      if (was) play(); else render();
+    }
+    const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    function line(i) {
+      const box = $('#lyr');
+      box.querySelectorAll('.ln').forEach(el => { el.classList.add('out'); setTimeout(() => el.remove(), 650); });
+      if (i < 0) return;
+      const g = GR[i % GR.length], el = document.createElement('div');
+      el.className = 'ln';
+      el.style.left = 28 + Math.random() * 44 + '%'; el.style.top = 35 + Math.random() * 30 + '%';
+      // каждая буква — свой цвет градиента и свечение, как в игре
+      const rgb = h => [1, 3, 5].map(j => parseInt(h.substr(j, 2), 16));
+      const a = rgb(g[0]), b = rgb(g[1]), chars = [...LYR[i][1]];
+      el.innerHTML = chars.map((c, k) => {
+        const t = chars.length > 1 ? k / (chars.length - 1) : 0;
+        const col = `rgb(${a.map((v, j) => Math.round(v + (b[j] - v) * t)).join(',')})`;
+        return `<i style="animation-delay:${k * 35}ms;color:${col};text-shadow:0 0 14px ${col}">${c === ' ' ? '&nbsp;' : c}</i>`;
+      }).join('');
+      box.appendChild(el);
+    }
+    function render() {
+      const s = now();
+      if (!drag) $('#mp-seek').value = s;
+      $('#mp-cur').textContent = fmt(s);
+      let i = -1; LYR.forEach((l, k) => { if (l[0] <= s) i = k; });
+      if (i !== lastLine) { lastLine = i; line(i); }
+    }
+    (function tick() { render(); requestAnimationFrame(tick); })();
+    $('#mp-play').textContent = '▶'; $('#mp-cover').classList.add('paused');
+    $('#mp-play').onclick = () => playing ? pause() : play();
+    // ушёл со вкладки — музыка на паузу
+    document.addEventListener('visibilitychange', () => { if (document.hidden && playing) pause(); });
+    $('#mp-back').onclick = () => seek(now() - 10);
+    $('#mp-fwd').onclick = () => seek(now() + 10);
+    $('#mp-seek').oninput = e => { drag = true; $('#mp-cur').textContent = fmt(+e.target.value); };
+    $('#mp-seek').onchange = e => { drag = false; seek(+e.target.value); };
+  })();
+
+  // ===================== летающие функции (под огнём) =====================
+  const words = $('#words');
+  const flyers = all().map(m => {
+    const s = document.createElement('span');
+    s.textContent = m[0];
+    s.className = 's' + Math.floor(Math.random() * 9);
+    const f = { el: s, x: Math.random(), y: Math.random(), vx: (Math.random() - .5) * .00004, vy: -.00002 - Math.random() * .00004, r: (Math.random() - .5) * 18, z: .5 + Math.random() };
+    s.style.fontSize = 11 + f.z * 9 + 'px';
+    s.style.opacity = (.05 + f.z * .09).toFixed(2);
+    words.appendChild(s);
+    return f;
+  });
+  let last = performance.now();
+  (function fly(t) {
+    const dt = Math.min(50, t - last); last = t;
+    const W = innerWidth, H = innerHeight, span = H * 1.2;
+    flyers.forEach(f => {
+      f.x += f.vx * dt; f.y += f.vy * dt * f.z;
+      if (f.x < -.15) f.x = 1.05; if (f.x > 1.1) f.x = -.1;
+      // дальние слова при прокрутке едут медленнее — глубина
+      let py = (f.y * span - scrollY * .12 * f.z) % span;
+      if (py < 0) py += span;
+      f.el.style.transform = `translate(${f.x * W}px, ${py - H * .1}px) rotate(${f.r}deg)`;
+    });
+    requestAnimationFrame(fly);
+  })(last);
+
+  // ===================== огонь (WebGL) =====================
+  (function fire() {
+    const cv = $('#fire');
+    const gl = cv.getContext('webgl', { premultipliedAlpha: false, alpha: true, antialias: false });
+    if (!gl) return;
+    const vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+    const fs = `precision mediump float;
+      uniform vec2 R; uniform float T;
+      float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+      float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+        return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      void main(){
+        vec2 uv=gl_FragCoord.xy/R; vec2 q=vec2(uv.x*R.x/R.y,uv.y);
+        // языки пламени поднимаются снизу и завихряются
+        vec2 w=vec2(fbm(q*2.+vec2(0.,-T*.35)),fbm(q*2.+vec2(5.2,-T*.4)));
+        float f=fbm(q*3.+w*1.6+vec2(0.,-T*.9));
+        float base=pow(1.-uv.y,1.05)*1.15+.38;
+        float fl=smoothstep(.3,1.05,f*base);
+        // по краям сильнее, в центре (где текст) — чуть темнее
+        fl*=mix(.75,1.,smoothstep(.1,.5,abs(uv.x-.5)))+.12;
+        // серое пламя: от тёмно-серого к почти белым языкам
+        vec3 c=mix(vec3(.06),vec3(.32),smoothstep(0.,.45,fl));
+        c=mix(c,vec3(.72),smoothstep(.45,.85,fl));
+        c=mix(c,vec3(.95),smoothstep(.85,1.1,fl)*.6);
+        // сигаретный дым в воздухе: тонкие завитки поднимаются и медленно расплываются
+        vec2 sq=q*vec2(2.2,1.4)+vec2(0.,-T*.12);
+        vec2 sw=vec2(fbm(sq+vec2(T*.05,0.)),fbm(sq+vec2(3.1,1.7)-vec2(0.,T*.04)));
+        float strand=fbm(sq*1.3+sw*2.6);
+        float wisp=pow(1.-abs(strand*2.-1.),9.)*smoothstep(.05,.6,uv.y)*.55;
+        c=mix(c,vec3(.78),wisp);
+        gl_FragColor=vec4(c,clamp(fl*1.5+.12+wisp*.9,0.,.97));
+      }`;
+    const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(pr); gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p');
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const uR = gl.getUniformLocation(pr, 'R'), uT = gl.getUniformLocation(pr, 'T');
+    function size() {
+      // половинное разрешение: огонь мягче, а видеокарте легче
+      cv.width = Math.max(1, innerWidth * .5); cv.height = Math.max(1, innerHeight * .5);
+      gl.viewport(0, 0, cv.width, cv.height);
+    }
+    size(); addEventListener('resize', size);
+    (function loop(t) {
+      gl.uniform2f(uR, cv.width, cv.height); gl.uniform1f(uT, t / 1000);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(loop);
+    })(0);
+  })();
+
+  // ===================== свечение курсора =====================
+  const glow = $('#glow');
+  let gx = innerWidth / 2, gy = innerHeight / 2, tx = gx, ty = gy;
+  addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+  document.addEventListener('mouseleave', () => { glow.style.opacity = 0; });
+  document.addEventListener('mouseenter', () => { glow.style.opacity = 1; });
+
+  // меню: изогнуто, пока далеко, и выпрямляется по мере прокрутки к нему
+  const scene = $('.scene');
+  function bend() {
+    const r = scene.getBoundingClientRect();
+    const p = Math.max(0, Math.min(1, (innerHeight - r.top) / (innerHeight * .75)));
+    const k = 1 - p * p * (3 - 2 * p);
+    scene.style.setProperty('--bend', (k * 32).toFixed(2) + 'deg');
+    scene.style.setProperty('--sc', (1 - k * .08).toFixed(3));
+    scene.style.setProperty('--curve', (26 + k * 400).toFixed(0) + 'px');
+  }
+  addEventListener('scroll', bend, { passive: true });
+  addEventListener('resize', bend);
+  bend();
+  (function g() { gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = `translate(${gx}px, ${gy}px)`; requestAnimationFrame(g); })();
+
+  // ===================== прочее =====================
+  addEventListener('scroll', () => $('#hdr').classList.toggle('solid', scrollY > 40), { passive: true });
+  const io = new IntersectionObserver(list => list.forEach(x => {
+    if (!x.isIntersecting) return;
+    x.target.classList.add('in');
+    x.target.querySelectorAll('[data-count]').forEach(b => {
+      const end = +b.dataset.count, t0 = performance.now();
+      const step = t => {
+        const k = Math.min(1, (t - t0) / 1200);
+        b.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + (k === 1 && 'plus' in b.dataset ? '+' : '');
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    io.unobserve(x.target);
+  }), { threshold: .12 });
+  document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+  function setTab(t) {
+    document.querySelectorAll('[data-auth]').forEach(b => b.classList.toggle('on', b.dataset.auth === t));
+    $('[data-form="login"]').hidden = t !== 'login';
+    $('[data-form="register"]').hidden = t !== 'register';
+  }
+  const closeAll = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => {
+    document.getElementById(b.dataset.open).classList.add('open');
+    if (b.dataset.tab) setTab(b.dataset.tab);
+  });
+  document.querySelectorAll('[data-auth]').forEach(b => b.onclick = () => setTab(b.dataset.auth));
+  document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeAll);
+  document.querySelectorAll('.modal').forEach(m => m.onclick = e => { if (e.target === m) closeAll(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+  document.querySelectorAll('form').forEach(f => f.onsubmit = e => {
+    e.preventDefault();
+    f.querySelector('.note').textContent = 'Скоро заработает — следи в Telegram';
+  });
+</script>
+</body>
+</html>
