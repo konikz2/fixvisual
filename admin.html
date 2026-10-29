@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Выдача Премиума — FixVisual</title>
+<style>
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-cyrillic-400-normal.woff2) format('woff2'); font-weight: 400; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-400-normal.woff2) format('woff2'); font-weight: 400; unicode-range: U+0000-00FF,U+2000-206F,U+20BD; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-cyrillic-600-normal.woff2) format('woff2'); font-weight: 600; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-600-normal.woff2) format('woff2'); font-weight: 600; unicode-range: U+0000-00FF,U+2000-206F,U+20BD; }
+  :root { --text: #f4f3f7; --muted: #9a98a5; --line: rgba(255,255,255,.1); --bg: #050506; --card: #0f0f12; --gold: #f5c542; --ok: #3dff7a; --bad: #ff6b6b; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 Onest, system-ui, sans-serif; min-height: 100vh; }
+  main { max-width: 640px; margin: 0 auto; padding: 48px 16px 80px; }
+  a { color: var(--muted); text-decoration: none; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 24px 0 6px; }
+  .sub { color: var(--muted); margin-bottom: 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 18px; }
+  label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  input, select { display: block; width: 100%; margin-top: 6px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: #08080a; color: var(--text); font: inherit; outline: none; }
+  input:focus, select:focus { border-color: rgba(255,255,255,.35); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+  button { width: 100%; padding: 13px; border: 0; border-radius: 12px; font: 600 15px Onest, sans-serif; cursor: pointer; background: var(--text); color: #050506; }
+  button.gold { background: var(--gold); }
+  button.ghost { width: auto; padding: 8px 14px; background: transparent; color: var(--muted); border: 1px solid var(--line); font-weight: 400; }
+  button:disabled { opacity: .5; cursor: default; }
+  .note { min-height: 22px; margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .note.ok { color: var(--ok); } .note.bad { color: var(--bad); }
+  .who { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; color: var(--muted); }
+  .who b { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td, th { text-align: left; padding: 10px 4px; border-top: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 400; border-top: 0; }
+  td.until { color: var(--muted); white-space: nowrap; }
+  td.until.off { color: var(--bad); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <a href="./">← На главную</a>
+  <h1>★ Выдача Премиума</h1>
+  <p class="sub">Страница только для администратора. Без прав администратора аккаунта выдать ничего нельзя — это проверяет сама база.</p>
+
+  <form class="card" id="login">
+    <label>Почта<input name="email" type="email" required autocomplete="email"></label>
+    <label>Пароль<input name="password" type="password" required autocomplete="current-password"></label>
+    <button>Войти</button>
+    <p class="note"></p>
+  </form>
+
+  <section id="panel" hidden>
+    <div class="who"><span>Вошёл как <b id="me"></b></span><button class="ghost" id="logout" type="button">Выйти</button></div>
+    <form class="card" id="grant">
+      <label>Ник аккаунта FixVisual<input name="nick" required minlength="3" maxlength="16" pattern="[A-Za-z0-9_]{3,16}" autocomplete="off"></label>
+      <label>Срок
+        <select name="plan">
+          <option value="30">Месяц — 99 ₽ (+30 дней)</option>
+          <option value="365">Год — 329 ₽ (+365 дней)</option>
+          <option value="0">Навсегда — 449 ₽</option>
+          <option value="-1">Снять Премиум</option>
+        </select>
+      </label>
+      <button class="gold">Выдать</button>
+      <p class="note"></p>
+    </form>
+    <div class="card">
+      <div class="who" style="margin-bottom:6px"><span>У кого Премиум</span><button class="ghost" id="reload" type="button">Обновить</button></div>
+      <table><thead><tr><th>Ник</th><th>До</th></tr></thead><tbody id="list"></tbody></table>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const KEY = 'AIzaSyBIlXmEGK4F7vBmEFSVEdeEBDyJD-zt1Ck';
+  const AUTH = 'https://identitytoolkit.googleapis.com/v1/accounts:';
+  const ROOT = 'https://firestore.googleapis.com/v1/projects/fixvisual-74ed4/databases/(default)/documents';
+  const DB = ROOT + '/';
+  const $ = s => document.querySelector(s);
+  const ERR = { INVALID_LOGIN_CREDENTIALS: 'Неверная почта или пароль', INVALID_PASSWORD: 'Неверная почта или пароль',
+    EMAIL_NOT_FOUND: 'Неверная почта или пароль', TOO_MANY_ATTEMPTS_TRY_LATER: 'Слишком много попыток, подожди немного' };
+  let token = null, myNick = null;
+
+  function note(form, text, kind) {
+    const n = form.querySelector('.note');
+    n.textContent = text; n.className = 'note' + (kind ? ' ' + kind : '');
+  }
+
+  async function req(method, url, body, auth) {
+    let r;
+    try {
+      r = await fetch(url, { method, headers: Object.assign({ 'Content-Type': 'application/json' }, auth ? { Authorization: 'Bearer ' + auth } : {}),
+        body: body ? JSON.stringify(body) : undefined });
+    } catch (e) { throw new Error('Нет связи с сервером'); }
+    if (r.status === 404 && method === 'GET') return null;
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const code = (j.error && j.error.message) || String(r.status);
+      if (r.status === 403) throw new Error('База отказала: у этого аккаунта нет прав администратора');
+      if (r.status === 401) throw new Error('Вход устарел — войди заново');
+      throw new Error(ERR[code.split(' ')[0]] || ('Ошибка: ' + code));
+    }
+    return j;
+  }
+  const get = path => req('GET', DB + path);
+
+  $('#login').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button');
+    btn.disabled = true; note(f, 'Вход…');
+    try {
+      const r = await req('POST', AUTH + 'signInWithPassword?key=' + KEY, { email: f.email.value.trim(), password: f.password.value, returnSecureToken: true });
+      const user = await get('users/' + r.localId);
+      if (!user) throw new Error('У аккаунта нет ника');
+      const nick = user.fields.nick.stringValue;
+      const g = await get('grants/' + nick.toLowerCase());
+      if (!(g && g.fields && g.fields.admin && g.fields.admin.booleanValue)) throw new Error('У аккаунта «' + nick + '» нет прав администратора');
+      token = r.idToken; myNick = nick;
+      f.password.value = '';
+      $('#me').textContent = nick;
+      f.hidden = true; $('#panel').hidden = false;
+      loadList();
+    } catch (err) { note(f, err.message, 'bad'); }
+    btn.disabled = false;
+  };
+
+  $('#logout').onclick = () => { token = myNick = null; $('#panel').hidden = true; $('#login').hidden = false; note($('#login'), ''); };
+
+  const ts = ms => ({ timestampValue: new Date(ms).toISOString() });
+  const fmt = ms => new Date(ms).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  $('#grant').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button');
+    const nick = f.nick.value.trim(), lower = nick.toLowerCase(), days = +f.plan.value;
+    btn.disabled = true; note(f, 'Выдаю…');
+    try {
+      if (!await get('nicks/' + lower)) throw new Error('Нет аккаунта FixVisual с ником «' + nick + '»');
+      const cur = await get('grants/' + lower);
+      const cf = (cur && cur.fields) || {};
+      const fields = { premium: { booleanValue: days !== -1 }, premiumBy: { stringValue: myNick }, premiumAt: ts(Date.now()) };
+      let msg;
+      if (days > 0) {
+        // продление: от текущего срока, если он ещё не кончился
+        let base = Date.now();
+        if (cf.premium && cf.premium.booleanValue) {
+          if (!cf.premiumUntil) throw new Error('У «' + nick + '» уже Премиум навсегда');
+          base = Math.max(base, Date.parse(cf.premiumUntil.timestampValue));
+        }
+        const until = base + days * 86400000;
+        fields.premiumUntil = ts(until);
+        msg = 'Готово: Премиум у «' + nick + '» до ' + fmt(until);
+      } else if (days === 0) {
+        msg = 'Готово: Премиум у «' + nick + '» навсегда';
+      } else {
+        msg = 'Премиум у «' + nick + '» снят';
+      }
+      // поле premiumUntil в маске, но без значения — значит «удалить» (навсегда / снят)
+      const mask = ['premium', 'premiumUntil', 'premiumBy', 'premiumAt'].map(k => 'updateMask.fieldPaths=' + k).join('&');
+      await req('PATCH', DB + 'grants/' + lower + '?' + mask, { fields }, token);
+      note(f, msg, 'ok');
+      f.nick.value = '';
+      loadList();
+    } catch (err) { note(f, err.message, 'bad'); }
+    btn.disabled = false;
+  };
+
+  async function loadList() {
+    const body = $('#list');
+    body.innerHTML = '<tr><td colspan="2" style="color:var(--muted)">Загрузка…</td></tr>';
+    try {
+      const rows = await req('POST', ROOT + ':runQuery', { structuredQuery: { from: [{ collectionId: 'grants' }],
+        where: { fieldFilter: { field: { fieldPath: 'premium' }, op: 'EQUAL', value: { booleanValue: true } } } } });
+      const items = rows.filter(r => r.document).map(r => ({
+        nick: r.document.name.split('/').pop(),
+        until: r.document.fields.premiumUntil ? Date.parse(r.document.fields.premiumUntil.timestampValue) : 0 }));
+      items.sort((a, b) => (a.until || Infinity) - (b.until || Infinity));
+      body.innerHTML = '';
+      if (!items.length) body.innerHTML = '<tr><td colspan="2" style="color:var(--muted)">Пока ни у кого</td></tr>';
+      for (const it of items) {
+        const tr = document.createElement('tr');
+        const a = document.createElement('td'); a.textContent = it.nick;
+        const b = document.createElement('td'); b.className = 'until' + (it.until && it.until < Date.now() ? ' off' : '');
+        b.textContent = it.until ? (it.until < Date.now() ? 'истёк ' : '') + fmt(it.until) : 'навсегда';
+        tr.append(a, b); body.append(tr);
+      }
+    } catch (err) { body.innerHTML = ''; const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="2"></td>'; tr.firstChild.textContent = err.message; body.append(tr); }
+  }
+  $('#reload').onclick = loadList;
+})();
+</script>
+</body>
+</html>
