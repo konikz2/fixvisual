@@ -19,7 +19,7 @@
   .sub { color: var(--muted); margin-bottom: 28px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 18px; }
   label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 14px; }
-  input, select { display: block; width: 100%; margin-top: 6px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+  input, select, textarea { display: block; width: 100%; margin-top: 6px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
     background: #08080a; color: var(--text); font: inherit; outline: none; }
   input:focus, select:focus { border-color: rgba(255,255,255,.35); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -37,6 +37,7 @@
   th { color: var(--muted); font-weight: 400; border-top: 0; }
   td.until { color: var(--muted); white-space: nowrap; }
   td.until.off { color: var(--bad); }
+  textarea { display: block; width: 100%; margin: 14px 0 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #08080a; color: var(--text); font: 16px/1.6 ui-monospace, Consolas, monospace; resize: vertical; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -71,6 +72,30 @@
     <div class="card">
       <div class="who" style="margin-bottom:6px"><span>У кого Премиум</span><button class="ghost" id="reload" type="button">Обновить</button></div>
       <table><thead><tr><th>Ник</th><th>До</th></tr></thead><tbody id="list"></tbody></table>
+    </div>
+
+    <form class="card" id="mkcodes">
+      <div class="who" style="margin-bottom:12px"><span><b>Коды на Премиум</b> — игрок вводит код на сайте, Премиум выдаётся его аккаунту</span></div>
+      <div class="row">
+        <label>Срок
+          <select name="days">
+            <option value="30">Месяц (+30 дней)</option>
+            <option value="365">Год (+365 дней)</option>
+            <option value="0">Навсегда</option>
+          </select>
+        </label>
+        <label>Сколько кодов<input name="count" type="number" min="1" max="50" value="1" required></label>
+      </div>
+      <button class="gold">Создать коды</button>
+      <p class="note"></p>
+      <div id="fresh" hidden>
+        <textarea id="freshText" readonly rows="4" aria-label="Новые коды"></textarea>
+        <button class="ghost" type="button" id="copyCodes">Скопировать все</button>
+      </div>
+    </form>
+    <div class="card">
+      <div class="who" style="margin-bottom:6px"><span>Все коды</span><button class="ghost" id="reloadCodes" type="button">Обновить</button></div>
+      <table><thead><tr><th>Код</th><th>Срок</th><th>Статус</th><th></th></tr></thead><tbody id="codes"></tbody></table>
     </div>
   </section>
 </main>
@@ -125,6 +150,7 @@
       $('#me').textContent = nick;
       f.hidden = true; $('#panel').hidden = false;
       loadList();
+      loadCodes();
     } catch (err) { note(f, err.message, 'bad'); }
     btn.disabled = false;
   };
@@ -192,6 +218,77 @@
     } catch (err) { body.innerHTML = ''; const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="2"></td>'; tr.firstChild.textContent = err.message; body.append(tr); }
   }
   $('#reload').onclick = loadList;
+
+  // ---------- коды ----------
+  const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // без 0/O и 1/I — не перепутать при вводе
+  function newCode() {
+    const r = crypto.getRandomValues(new Uint32Array(10));
+    let s = '';
+    for (let i = 0; i < 10; i++) s += ABC[r[i] % ABC.length] + (i === 4 ? '-' : '');
+    return s;
+  }
+  const DOCS = 'projects/fixvisual-74ed4/databases/(default)/documents/';
+  const PLAN = d => d === 0 ? 'Навсегда' : d === 365 ? 'Год' : d === 30 ? 'Месяц' : d + ' дн.';
+
+  $('#mkcodes').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button.gold');
+    const days = +f.days.value, count = Math.max(1, Math.min(50, +f.count.value || 1));
+    btn.disabled = true; note(f, 'Создаю…');
+    try {
+      const codes = Array.from({ length: count }, newCode);
+      await req('POST', ROOT + ':commit', { writes: codes.map(c => ({
+        update: { name: DOCS + 'codes/' + c, fields: { days: { integerValue: String(days) }, created: ts(Date.now()),
+          by: { stringValue: myNick }, used: { booleanValue: false } } },
+        currentDocument: { exists: false } })) }, token);
+      $('#freshText').value = codes.join('\n');
+      $('#fresh').hidden = false;
+      note(f, 'Готово: ' + count + ' ' + (count === 1 ? 'код' : 'кодов') + ' · ' + PLAN(days), 'ok');
+      loadCodes();
+    } catch (err) { note(f, err.message, 'bad'); }
+    btn.disabled = false;
+  };
+  $('#copyCodes').onclick = async () => {
+    try { await navigator.clipboard.writeText($('#freshText').value); $('#copyCodes').textContent = 'Скопировано'; }
+    catch (e) { $('#freshText').select(); }
+    setTimeout(() => $('#copyCodes').textContent = 'Скопировать все', 1500);
+  };
+
+  async function loadCodes() {
+    const body = $('#codes');
+    body.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Загрузка…</td></tr>';
+    try {
+      const rows = await req('POST', ROOT + ':runQuery', { structuredQuery: { from: [{ collectionId: 'codes' }],
+        orderBy: [{ field: { fieldPath: 'created' }, direction: 'DESCENDING' }], limit: 200 } }, token);
+      const items = rows.filter(r => r.document).map(r => {
+        const x = r.document.fields;
+        return { code: r.document.name.split('/').pop(), days: +x.days.integerValue, used: x.used.booleanValue,
+          by: x.usedBy ? x.usedBy.stringValue : '', at: x.usedAt ? Date.parse(x.usedAt.timestampValue) : 0 };
+      });
+      body.innerHTML = '';
+      if (!items.length) body.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Кодов пока нет</td></tr>';
+      for (const it of items) {
+        const tr = document.createElement('tr');
+        const c = document.createElement('td'); c.textContent = it.code; c.style.fontFamily = 'ui-monospace, Consolas, monospace';
+        const p = document.createElement('td'); p.textContent = PLAN(it.days);
+        const s = document.createElement('td'); s.className = 'until';
+        s.textContent = it.used ? 'активировал ' + it.by + (it.at ? ', ' + fmt(it.at) : '') : 'не использован';
+        const a = document.createElement('td');
+        if (!it.used) {
+          const del = document.createElement('button');
+          del.className = 'ghost'; del.type = 'button'; del.textContent = 'Удалить';
+          del.setAttribute('aria-label', 'Удалить код ' + it.code);
+          del.onclick = async () => {
+            if (!confirm('Удалить код ' + it.code + '? Его больше нельзя будет активировать.')) return;
+            try { await req('DELETE', DB + 'codes/' + it.code, null, token); loadCodes(); } catch (err) { alert(err.message); }
+          };
+          a.append(del);
+        }
+        tr.append(c, p, s, a); body.append(tr);
+      }
+    } catch (err) { body.innerHTML = ''; const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="4"></td>'; tr.firstChild.textContent = err.message; body.append(tr); }
+  }
+  $('#reloadCodes').onclick = loadCodes;
 })();
 </script>
 </body>
