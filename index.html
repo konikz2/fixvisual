@@ -1013,117 +1013,135 @@
 </script>
 
 <!-- ===================== аккаунты (Firebase) ===================== -->
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile,
-    onAuthStateChanged, signOut, reload } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-  import { getFirestore, doc, getDoc, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+<script>
+  // ===================== аккаунты FixVisual =====================
+  // Без библиотеки Firebase (её адрес gstatic.com в России часто не открывается) — прямые запросы к Firebase,
+  // как в лаунчере. Аккаунты общие: сайт, лаунчер и игра.
+  (() => {
+    const KEY = 'AIzaSyBIlXmEGK4F7vBmEFSVEdeEBDyJD-zt1Ck';
+    const AUTH = 'https://identitytoolkit.googleapis.com/v1/accounts:';
+    const DB = 'https://firestore.googleapis.com/v1/projects/fixvisual-74ed4/databases/(default)/documents/';
+    const DOCS = 'projects/fixvisual-74ed4/databases/(default)/documents/';
+    const q = s => document.querySelector(s);
+    const note = (form, t) => { form.querySelector('.note').textContent = t; };
 
-  const app = initializeApp({
-    apiKey: 'AIzaSyBIlXmEGK4F7vBmEFSVEdeEBDyJD-zt1Ck',
-    authDomain: 'fixvisual-74ed4.firebaseapp.com',
-    projectId: 'fixvisual-74ed4',
-    appId: '1:254195191111:web:15ccbb22c6a2e621d85062'
-  });
-  const auth = getAuth(app), db = getFirestore(app);
-  auth.languageCode = 'ru';
-  const q = s => document.querySelector(s);
-  const note = (form, t) => { form.querySelector('.note').textContent = t; };
+    const ERR = {
+      EMAIL_EXISTS: 'Эта почта уже зарегистрирована — войди',
+      INVALID_EMAIL: 'Неверная почта',
+      WEAK_PASSWORD: 'Пароль слишком простой (от 6 символов)',
+      INVALID_LOGIN_CREDENTIALS: 'Неверная почта или пароль',
+      INVALID_PASSWORD: 'Неверная почта или пароль',
+      EMAIL_NOT_FOUND: 'Неверная почта или пароль',
+      TOO_MANY_ATTEMPTS_TRY_LATER: 'Слишком много попыток, подожди немного',
+      USER_DISABLED: 'Аккаунт заблокирован'
+    };
+    class Fail extends Error {}
 
-  const ERR = {
-    'auth/email-already-in-use': 'Эта почта уже зарегистрирована — войди',
-    'auth/invalid-email': 'Неверная почта',
-    'auth/weak-password': 'Пароль слишком простой (от 6 символов)',
-    'auth/invalid-credential': 'Неверная почта или пароль',
-    'auth/too-many-requests': 'Слишком много попыток, подожди немного',
-    'auth/network-request-failed': 'Нет связи с сервером',
-    'auth/operation-not-allowed': 'Регистрация ещё не включена — загляни позже'
-  };
-  const msg = e => ERR[e.code] || ('Ошибка: ' + (e.code || e.message));
-
-  // ник занимается после подтверждения почты: первый, кто подтвердил, — тот и владелец
-  async function claimNick(user) {
-    const nick = (user.displayName || '').trim();
-    if (!nick) return { error: 'Ник не найден — зарегистрируйся заново' };
-    const lower = nick.toLowerCase();
-    const mine = await getDoc(doc(db, 'users', user.uid));
-    if (mine.exists()) return { nick: mine.data().nick };
-    const taken = await getDoc(doc(db, 'nicks', lower));
-    if (taken.exists() && taken.data().uid !== user.uid) return { error: 'Ник «' + nick + '» уже занят' };
-    const b = writeBatch(db);
-    b.set(doc(db, 'nicks', lower), { uid: user.uid });
-    b.set(doc(db, 'users', user.uid), { nick, created: serverTimestamp() });
-    await b.commit();
-    return { nick };
-  }
-
-  async function showAccount(user) {
-    const right = q('.nav .right');
-    if (!user || !user.emailVerified) {
-      right.innerHTML = '<button class="btn" data-acc="login">Войти</button><button class="btn white" data-acc="register">Регистрация</button>';
-      right.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => openAuth(b.dataset.acc));
-      return;
+    async function call(url, body, token) {
+      let r;
+      try {
+        r = await fetch(url, {
+          method: body ? 'POST' : 'GET',
+          headers: Object.assign({ 'Content-Type': 'application/json', 'X-Firebase-Locale': 'ru' }, token ? { Authorization: 'Bearer ' + token } : {}),
+          body: body ? JSON.stringify(body) : undefined
+        });
+      } catch (e) { throw new Fail('Нет связи с сервером'); }
+      if (r.status === 404 && url.startsWith(DB)) return null;
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const code = (j.error && j.error.message) || String(r.status);
+        if (url.startsWith(DB)) throw new Fail(r.status === 403 || r.status === 409 ? 'Ник уже занят' : 'Ошибка базы: ' + code);
+        throw new Fail(ERR[code.split(' ')[0]] || ('Ошибка: ' + code));
+      }
+      return j;
     }
-    const r = await claimNick(user).catch(e => ({ error: msg(e) }));
-    const nick = r.nick || user.displayName || 'Аккаунт';
-    let tags = '';
-    try {
-      const g = await getDoc(doc(db, 'grants', nick.toLowerCase()));
-      if (g.exists()) {
-        if (g.data().admin) tags += ' · Админ';
-        if (g.data().sponsor) tags += ' · Спонсор';
+    const doc = (path, token) => call(DB + path, null, token);
+
+    // ник закрепляется при первом входе с подтверждённой почтой: первый, кто подтвердил, — тот и владелец
+    async function claimNick(token, uid, wanted) {
+      const mine = await doc('users/' + uid, token);
+      if (mine) return mine.fields.nick.stringValue;
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(wanted || '')) throw new Fail('У аккаунта нет ника — зарегистрируйся заново');
+      try {
+        await call(DB.replace(/\/$/, '') + ':commit', { writes: [
+          { update: { name: DOCS + 'nicks/' + wanted.toLowerCase(), fields: { uid: { stringValue: uid } } }, currentDocument: { exists: false } },
+          { update: { name: DOCS + 'users/' + uid, fields: { nick: { stringValue: wanted }, created: { timestampValue: new Date().toISOString() } } },
+            currentDocument: { exists: false } }
+        ] }, token);
+      } catch (e) { throw new Fail('Ник «' + wanted + '» уже занят — зарегистрируй аккаунт с другим ником'); }
+      return wanted;
+    }
+
+    // вход запоминается в этом браузере (только ник и почта — пароль не хранится)
+    const saved = () => { try { return JSON.parse(localStorage.getItem('fv_account') || 'null'); } catch (e) { return null; } };
+    const save = v => { try { v ? localStorage.setItem('fv_account', JSON.stringify(v)) : localStorage.removeItem('fv_account'); } catch (e) {} };
+
+    async function showAccount() {
+      const right = q('.nav .right');
+      const a = saved();
+      if (!a) {
+        right.innerHTML = '<button class="btn" data-acc="login">Войти</button><button class="btn white" data-acc="register">Регистрация</button>';
+        right.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => openAuth(b.dataset.acc));
+        return;
       }
-    } catch (e) { /* без прав */ }
-    right.innerHTML = `<span class="btn" style="cursor:default">${nick.replace(/</g, '&lt;')}${tags}</span><button class="btn" data-acc="out">Выйти</button>`;
-    right.querySelector('[data-acc="out"]').onclick = () => signOut(auth);
-  }
+      let tags = '';
+      try {
+        const g = await doc('grants/' + a.nick.toLowerCase());
+        if (g && g.fields) {
+          if (g.fields.admin && g.fields.admin.booleanValue) tags += ' · Админ';
+          if (g.fields.sponsor && g.fields.sponsor.booleanValue) tags += ' · Спонсор';
+        }
+      } catch (e) { /* без прав */ }
+      right.innerHTML = '<span class="btn" style="cursor:default">' + a.nick.replace(/</g, '&lt;') + tags + '</span><button class="btn" data-acc="out">Выйти</button>';
+      right.querySelector('[data-acc="out"]').onclick = () => { save(null); showAccount(); };
+    }
 
-  function openAuth(tab) {
-    document.getElementById('auth').classList.add('open');
-    document.querySelectorAll('[data-auth]').forEach(b => b.classList.toggle('on', b.dataset.auth === tab));
-    q('[data-form="login"]').hidden = tab !== 'login';
-    q('[data-form="register"]').hidden = tab !== 'register';
-  }
+    function openAuth(tab) {
+      document.getElementById('auth').classList.add('open');
+      document.querySelectorAll('[data-auth]').forEach(b => b.classList.toggle('on', b.dataset.auth === tab));
+      q('[data-form="login"]').hidden = tab !== 'login';
+      q('[data-form="register"]').hidden = tab !== 'register';
+    }
 
-  q('[data-form="register"]').onsubmit = async e => {
-    e.preventDefault();
-    const f = e.target, nick = f.nick.value.trim();
-    if (!/^[A-Za-z0-9_]{3,16}$/.test(nick)) return note(f, 'Ник: 3–16 символов, латиница, цифры и _');
-    note(f, 'Проверяю ник…');
-    try {
-      const taken = await getDoc(doc(db, 'nicks', nick.toLowerCase()));
-      if (taken.exists()) return note(f, 'Ник «' + nick + '» уже занят');
-      const cred = await createUserWithEmailAndPassword(auth, f.email.value.trim(), f.password.value);
-      await updateProfile(cred.user, { displayName: nick });
-      await sendEmailVerification(cred.user);
-      await signOut(auth);
-      note(f, 'Готово! Мы отправили письмо на ' + f.email.value.trim() + ' — подтверди почту по ссылке и войди');
-    } catch (err) { note(f, msg(err)); }
-  };
+    q('[data-form="register"]').onsubmit = async e => {
+      e.preventDefault();
+      const f = e.target, nick = f.nick.value.trim(), email = f.email.value.trim();
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(nick)) return note(f, 'Ник: 3–16 символов, латиница, цифры и _');
+      note(f, 'Проверяю ник…');
+      try {
+        if (await doc('nicks/' + nick.toLowerCase())) return note(f, 'Ник «' + nick + '» уже занят');
+        const r = await call(AUTH + 'signUp?key=' + KEY, { email, password: f.password.value, returnSecureToken: true });
+        await call(AUTH + 'update?key=' + KEY, { idToken: r.idToken, displayName: nick, returnSecureToken: false });
+        await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'VERIFY_EMAIL', idToken: r.idToken });
+        f.password.value = '';
+        note(f, 'Готово! Письмо отправлено на ' + email + ' — подтверди почту по ссылке (проверь и «Спам»), потом войди');
+      } catch (err) { note(f, err.message); }
+    };
 
-  q('[data-form="login"]').onsubmit = async e => {
-    e.preventDefault();
-    const f = e.target;
-    note(f, 'Вхожу…');
-    try {
-      const cred = await signInWithEmailAndPassword(auth, f.email.value.trim(), f.password.value);
-      await reload(cred.user);
-      if (!cred.user.emailVerified) {
-        await sendEmailVerification(cred.user).catch(() => {});
-        await signOut(auth);
-        return note(f, 'Сначала подтверди почту — письмо отправлено ещё раз');
-      }
-      const r = await claimNick(cred.user);
-      if (r.error) { await signOut(auth); return note(f, r.error); }
-      note(f, 'Привет, ' + r.nick + '!');
-      setTimeout(() => document.getElementById('auth').classList.remove('open'), 700);
-      showAccount(cred.user);
-    } catch (err) { note(f, msg(err)); }
-  };
+    q('[data-form="login"]').onsubmit = async e => {
+      e.preventDefault();
+      const f = e.target, email = f.email.value.trim();
+      note(f, 'Вхожу…');
+      try {
+        const r = await call(AUTH + 'signInWithPassword?key=' + KEY, { email, password: f.password.value, returnSecureToken: true });
+        const info = await call(AUTH + 'lookup?key=' + KEY, { idToken: r.idToken });
+        const u = info.users[0];
+        if (!u.emailVerified) {
+          await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'VERIFY_EMAIL', idToken: r.idToken }).catch(() => {});
+          return note(f, 'Сначала подтверди почту — письмо отправлено ещё раз (проверь «Спам»)');
+        }
+        const nick = await claimNick(r.idToken, r.localId, u.displayName);
+        save({ nick, email });
+        note(f, 'Привет, ' + nick + '!');
+        setTimeout(() => document.getElementById('auth').classList.remove('open'), 700);
+        showAccount();
+      } catch (err) { note(f, err.message); }
+    };
 
-  onAuthStateChanged(auth, user => showAccount(user));
-  // из лаунчера: …/fixvisual/#register — сразу окно регистрации, #login — входа
-  if (location.hash === '#register' || location.hash === '#login') openAuth(location.hash.slice(1));
+    showAccount();
+    // из лаунчера: …/fixvisual/#register — сразу окно регистрации, #login — входа
+    if (location.hash === '#register' || location.hash === '#login') openAuth(location.hash.slice(1));
+  })();
 </script>
 </body>
 </html>
