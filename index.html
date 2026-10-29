@@ -650,6 +650,7 @@
           <p class="plans">329 ₽ в год · 449 ₽ навсегда</p>
           <ul><li>14 премиум-функций: Damage Log, Chat Translate, Clip Buffer, FPS Doctor, Stream Shield и другие</li><li>Префикс «Спонсор» на всех твоих игровых никах</li><li>Работает, когда вошёл в лаунчер своим аккаунтом</li><li>Поддержка разработки</li></ul>
           <button class="btn gold" data-open="buy">Купить Премиум</button>
+          <button class="btn" data-open="redeem" style="margin-top:10px">У меня есть код</button>
         </div>
       </div>
     </div>
@@ -711,7 +712,24 @@
       <p class="final">Цена окончательная: без комиссий и без автопродления. 14 дней — возврат всей суммы.</p>
       <label class="agree"><input type="checkbox" name="terms" required> <span>Принимаю <a href="terms.html#refund" target="_blank">условия покупки и возврата</a></span></label>
       <button class="btn gold">Перейти к оплате</button>
+      <p class="legal">Есть код? <a href="#" data-redeem-link>Активировать код</a></p>
       <p class="note"></p>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="redeem" role="dialog" aria-modal="true" aria-labelledby="redeem-title">
+  <div class="box">
+    <button class="x" data-close aria-label="Закрыть">×</button>
+    <h3 class="serif" id="redeem-title">Активировать код</h3>
+    <p class="sub">Код вида XRB24-DBKE3 — Премиум выдаётся твоему аккаунту FixVisual. Если Премиум уже есть, срок добавится к оставшемуся.</p>
+    <form data-form="redeem">
+      <label>Код<input name="code" required autocomplete="off" spellcheck="false" maxlength="11" placeholder="XXXXX-XXXXX" style="text-transform:uppercase;letter-spacing:.08em"></label>
+      <label>Почта аккаунта<input name="email" type="email" required autocomplete="email"></label>
+      <label>Пароль<input name="password" type="password" required autocomplete="current-password"></label>
+      <button class="btn gold">Активировать</button>
+      <p class="legal">Активируя код, принимаешь <a href="terms.html" target="_blank">пользовательское соглашение</a>. Один код — одна активация.</p>
+      <p class="note" role="status"></p>
     </form>
   </div>
 </div>
@@ -1655,6 +1673,58 @@
         await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'PASSWORD_RESET', email });
         note(f, 'Если аккаунт с этой почтой есть, письмо со ссылкой уже отправлено (проверь «Спам»)');
       } catch (err) { note(f, err.message === 'Неверная почта или пароль' ? 'Письмо отправлено, если аккаунт существует' : err.message); }
+    };
+
+    // ===== коды на Премиум =====
+    q('[data-redeem-link]').onclick = e => { e.preventDefault(); window.fvClose(document.getElementById('buy')); setTimeout(() => window.fvOpen('redeem', e.target), 460); };
+    const rf = q('[data-form="redeem"]');
+    rf.code.oninput = () => {
+      const v = rf.code.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+      rf.code.value = v.length > 5 ? v.slice(0, 5) + '-' + v.slice(5) : v;
+    };
+    rf.onsubmit = async e => {
+      e.preventDefault();
+      const code = rf.code.value.toUpperCase().trim(), email = rf.email.value.trim();
+      if (!/^[A-Z0-9]{5}-[A-Z0-9]{5}$/.test(code)) return note(rf, 'Код выглядит так: XRB24-DBKE3');
+      const btn = rf.querySelector('button.gold');
+      btn.disabled = true; note(rf, 'Проверяю код…');
+      try {
+        const r = await call(AUTH + 'signInWithPassword?key=' + KEY, { email, password: rf.password.value, returnSecureToken: true });
+        const me = await doc('users/' + r.localId, r.idToken);
+        if (!me) throw new Fail('Сначала войди на сайте один раз — чтобы закрепить ник за аккаунтом');
+        const nick = me.fields.nick.stringValue, lower = nick.toLowerCase();
+        let c;
+        try { c = await doc('codes/' + code, r.idToken); } catch (err) { throw new Fail('Не удалось проверить код — подтверди почту и попробуй снова'); }
+        if (!c) throw new Fail('Такого кода нет — проверь, нет ли опечатки');
+        if (c.fields.used.booleanValue) throw new Fail('Этот код уже активирован');
+        const days = +c.fields.days.integerValue;
+        const g = await doc('grants/' + lower);
+        const gf = (g && g.fields) || {};
+        const had = gf.premium && gf.premium.booleanValue;
+        if (had && !gf.premiumUntil) throw new Fail('У тебя уже Премиум навсегда — код можно подарить другу');
+        const now = new Date().toISOString();
+        const fields = { premium: { booleanValue: true }, premiumCode: { stringValue: code }, premiumBy: { stringValue: 'code' }, premiumAt: { timestampValue: now } };
+        let until = 0;
+        if (days > 0) {
+          const base = had && gf.premiumUntil ? Math.max(Date.now(), Date.parse(gf.premiumUntil.timestampValue)) : Date.now();
+          until = base + days * 86400000;
+          fields.premiumUntil = { timestampValue: new Date(until).toISOString() };
+        }
+        const mask = f => ({ fieldPaths: f });
+        try {
+          await call(DB.replace(/\/$/, '') + ':commit', { writes: [
+            { update: { name: DOCS + 'codes/' + code, fields: { used: { booleanValue: true }, usedBy: { stringValue: lower }, usedAt: { timestampValue: now } } },
+              updateMask: mask(['used', 'usedBy', 'usedAt']), currentDocument: { exists: true } },
+            { update: { name: DOCS + 'grants/' + lower, fields }, updateMask: mask(['premium', 'premiumUntil', 'premiumCode', 'premiumBy', 'premiumAt']) }
+          ] }, r.idToken);
+        } catch (err) { throw new Fail('Код не принят — возможно, его только что активировали. Попробуй ещё раз'); }
+        rf.password.value = ''; rf.code.value = '';
+        note(rf, '★ Премиум активирован для «' + nick + '» ' + (days ? 'до ' + new Date(until).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'навсегда')
+          + '. Зайди в лаунчер под этим аккаунтом и запусти игру.');
+        save({ nick, email });
+        showAccount();
+      } catch (err) { note(rf, err.message); }
+      btn.disabled = false;
     };
 
     showAccount();
