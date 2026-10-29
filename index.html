@@ -388,6 +388,29 @@
   #tl .kf:hover span { opacity: 1; }
   footer { padding-bottom: 84px; }
 
+  /* разделы — панели: въезжают снизу с наклоном, уходя — отъезжают вглубь и темнеют */
+  main > section { position: relative; transform-origin: 50% 0; background: linear-gradient(rgba(10,10,12,.5), rgba(10,10,12,.25)); border-top: 1px solid var(--line); }
+  main > section::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; background: #000; opacity: var(--dim, 0); }
+  main > section.outro { background: none; border-top: 0; }
+
+  /* бегущие строки между разделами: скорость и наклон — от скорости прокрутки */
+  .band { position: relative; overflow: hidden; padding: 26px 0; border-top: 1px solid var(--line); background: rgba(5,5,6,.55); user-select: none; }
+  .band .bt { display: flex; width: max-content; white-space: nowrap; will-change: transform; }
+  .band span { font-family: "Instrument Serif", Georgia, serif; font-size: clamp(56px, 9vw, 124px); line-height: 1; padding-right: .3em;
+    color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.3); }
+  .band span.fill { color: #e4e4e7; -webkit-text-stroke: 0; }
+  .band span i { display: inline-block; font-style: normal; font-size: .35em; vertical-align: middle; margin-left: .45em; color: #52525b; -webkit-text-stroke: 0; }
+
+  /* шторка между разделами при переходе из меню */
+  #shutter { position: fixed; inset: 0; z-index: 60; display: flex; pointer-events: none; }
+  #shutter.on { pointer-events: auto; }
+  #shutter > i { flex: 1; background: #09090b; transform: scaleY(0); border-right: 1px solid rgba(255,255,255,.04); }
+  #shutter .lbl { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 0; }
+  #shutter .lbl small { font: 500 12px "JetBrains Mono", monospace; color: #71717a; letter-spacing: .2em; }
+  #shutter .lbl b { font: 400 clamp(64px, 12vw, 170px)/1 "Instrument Serif", Georgia, serif; color: #f4f3f7; }
+  #shutter .lbl .bar { width: min(320px, 60vw); height: 1px; background: rgba(255,255,255,.15); }
+  #shutter .lbl .bar u { display: block; height: 100%; background: #e4e4e7; transform-origin: 0 0; text-decoration: none; }
+
   @media (prefers-reduced-motion: reduce) {
     .rv, .split .wi { transition: none !important; filter: none !important; transform: none !important; opacity: 1 !important; }
     .hero .tag, .hero .vs, .hero p, .hero .cta, #graph * { animation: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; }
@@ -1202,7 +1225,7 @@
       k.className = 'kf';
       k.title = name;
       k.innerHTML = '<span>' + name + '</span>';
-      k.onclick = () => document.querySelector(sel).scrollIntoView({ behavior: 'smooth' });
+      k.onclick = () => window.fvGo(sel);
       track.append(k);
       return { k, el: document.querySelector(sel), at: 0 };
     });
@@ -1221,6 +1244,149 @@
     addEventListener('scroll', tick, { passive: true });
     addEventListener('resize', () => { place(); tick(); });
     addEventListener('load', () => { place(); tick(); });
+  })();
+
+  // ===================== переходы при прокрутке =====================
+  (function scenes() {
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const NAMES = { '#top': ['00', 'Начало'], '#menu': ['01', 'Меню'], '#features': ['02', 'Функции'], '#download': ['03', 'Скачать'], '#prices': ['04', 'Цены'] };
+
+    // плавная прокрутка колесом с инерцией (тачпады и телефоны — как есть)
+    let target = scrollY, cur = scrollY, gliding = false;
+    const maxY = () => document.documentElement.scrollHeight - innerHeight;
+    const glide = () => {
+      cur += (target - cur) * .09;
+      if (Math.abs(target - cur) < .5) { cur = target; gliding = false; }
+      scrollTo(0, cur);
+      if (gliding) requestAnimationFrame(glide);
+    };
+    const inner = el => {
+      for (; el && el !== document.body; el = el.parentElement) {
+        const s = getComputedStyle(el);
+        if (/(auto|scroll)/.test(s.overflowY) && el.scrollHeight > el.clientHeight + 1) return true;
+      }
+      return false;
+    };
+    if (!calm && matchMedia('(pointer: fine)').matches) {
+      document.documentElement.style.scrollBehavior = 'auto';
+      addEventListener('wheel', e => {
+        if (e.ctrlKey || document.querySelector('.modal.open') || inner(e.target)) return;
+        e.preventDefault();
+        if (!gliding) target = cur = scrollY;
+        target = clamp(target + e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1), 0, maxY());
+        if (!gliding) { gliding = true; requestAnimationFrame(glide); }
+      }, { passive: false });
+    }
+    const jump = y => { gliding = false; target = cur = y; scrollTo(0, y); };
+
+    // бегущие строки перед разделами
+    const bands = [];
+    [['#menu', 'Меню'], ['#features', 'Функции'], ['#download', 'Скачать'], ['#prices', 'Цены']].forEach(([sel, word], n) => {
+      const sec = document.querySelector(sel), band = document.createElement('div'), bt = document.createElement('div');
+      band.className = 'band';
+      band.setAttribute('aria-hidden', 'true');
+      bt.className = 'bt';
+      let html = '';
+      for (let i = 0; i < 8; i++) html += `<span class="${i % 2 ? '' : 'fill'}">${word}<i>✦</i></span>`;
+      bt.innerHTML = html + html;
+      band.append(bt);
+      sec.before(band);
+      bands.push({ band, bt, dir: n % 2 ? 1 : -1, x: 0 });
+    });
+
+    // шторка: столбцы падают, название раздела, прыжок, столбцы уходят вверх
+    const sh = document.createElement('div');
+    sh.id = 'shutter';
+    sh.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><div class="lbl"><small></small><b></b><div class="bar"><u></u></div></div>';
+    document.body.append(sh);
+    const cols = [...sh.querySelectorAll(':scope > i')], lbl = sh.querySelector('.lbl');
+    let busy = false;
+    window.fvGo = sel => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const y = Math.round(el.getBoundingClientRect().top + scrollY - (sel === '#top' ? 0 : 70));
+      if (calm) return jump(y);
+      if (busy) return;
+      busy = true;
+      sh.classList.add('on');
+      const [num, name] = NAMES[sel] || ['', ''];
+      lbl.querySelector('small').textContent = '/ ' + num;
+      lbl.querySelector('b').textContent = name;
+      const IN = 'cubic-bezier(.7,0,.3,1)';
+      cols.forEach((c, i) => c.animate([{ transform: 'scaleY(0)', transformOrigin: '50% 0' }, { transform: 'scaleY(1)', transformOrigin: '50% 0' }],
+        { duration: 520, delay: i * 45, easing: IN, fill: 'forwards' }));
+      setTimeout(() => {
+        jump(y);
+        lbl.animate([{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(10px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+          { duration: 500, easing: EASE, fill: 'forwards' });
+        lbl.querySelector('u').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 650, easing: EASE, fill: 'forwards' });
+      }, 520 + 5 * 45);
+      setTimeout(() => {
+        lbl.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-30px)', filter: 'blur(10px)' }], { duration: 380, easing: 'ease-in', fill: 'forwards' });
+        cols.forEach((c, i) => c.animate([{ transform: 'scaleY(1)', transformOrigin: '50% 100%' }, { transform: 'scaleY(0)', transformOrigin: '50% 100%' }],
+          { duration: 620, delay: 200 + i * 45, easing: IN, fill: 'forwards' }));
+        setTimeout(() => { sh.classList.remove('on'); busy = false; }, 200 + 620 + 5 * 45);
+      }, 520 + 5 * 45 + 750);
+    };
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="#"]');
+      const href = a && a.getAttribute('href');
+      if (!href || href.length < 2 || !document.querySelector(href)) return;
+      e.preventDefault();
+      window.fvGo(href);
+    });
+
+    if (calm) return;
+    const secs = [...document.querySelectorAll('main > section')].map(el => ({ el, last: '' }));
+    const h1 = $('.hero h1'), heroWrap = $('.hero .wrap'), graph = $('#graph');
+    const words = [...h1.querySelectorAll('.w')];
+    let lastY = scrollY, vel = 0, t0 = performance.now();
+    (function frame(now) {
+      const dt = Math.min(50, now - t0);
+      t0 = now;
+      const H = innerHeight;
+      vel += ((scrollY - lastY) - vel) * .2;
+      lastY = scrollY;
+
+      // главный экран разъезжается: слова в стороны, график приближается
+      const s = clamp(scrollY / H, 0, 1);
+      if (s < 1) {
+        words.forEach((w, i) => w.style.transform = `translateX(${(i - (words.length - 1) / 2) * s * 140}px)`);
+        heroWrap.style.transform = `translateY(${s * H * .28}px)`;
+        heroWrap.style.opacity = 1 - s * 1.1;
+        graph.style.transform = `scale(${1 + s * .35}) rotate(${s * -4}deg)`;
+      }
+
+      // разделы: вход (e) и уход (q)
+      secs.forEach(o => {
+        const r = o.el.getBoundingClientRect();
+        let e = clamp((H - r.top) / (H * .8), 0, 1);
+        e = 1 - Math.pow(1 - e, 3);
+        const q = clamp(1 - r.bottom / (H * .55), 0, 1);
+        const key = e.toFixed(3) + q.toFixed(3);
+        if (key === o.last) return;
+        o.last = key;
+        if (e >= 1 && q <= 0) {
+          o.el.style.transform = o.el.style.borderRadius = '';
+          o.el.style.setProperty('--dim', 0);
+          return;
+        }
+        const k = 1 - e;
+        o.el.style.transform = `perspective(1600px) translateY(${k * 110}px) rotateX(${k * 10}deg) scale(${(.94 + .06 * e) * (1 - q * .08)})`;
+        o.el.style.borderRadius = `${k * 64}px ${k * 64}px 0 0`;
+        o.el.style.setProperty('--dim', (q * .65).toFixed(3));
+      });
+
+      // бегущие строки: своя скорость + скорость прокрутки, наклон от рывка
+      const skew = clamp(vel * .35, -14, 14);
+      bands.forEach(b => {
+        const half = b.bt.scrollWidth / 2;
+        b.x = (b.x + b.dir * (dt * .05 + Math.abs(vel) * .6)) % half;
+        if (b.x > 0) b.x -= half;
+        b.bt.style.transform = `translateX(${b.x}px) skewX(${b.dir * skew}deg)`;
+      });
+      requestAnimationFrame(frame);
+    })(t0);
   })();
 
   function setTab(t, animate) {
