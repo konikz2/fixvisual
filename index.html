@@ -1304,7 +1304,7 @@
     window.fvGo = sel => {
       const el = document.querySelector(sel);
       if (!el) return;
-      const y = Math.round(el.getBoundingClientRect().top + scrollY - (sel === '#top' ? 0 : 70));
+      const y = Math.round(el.getBoundingClientRect().top + scrollY - (sel === '#top' ? 0 : 10));
       if (calm) return jump(y);
       if (busy) return;
       busy = true;
