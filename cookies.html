@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Политика cookie — FixVisual</title>
+<style>
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-cyrillic-400-normal.woff2) format('woff2'); font-weight: 400; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-400-normal.woff2) format('woff2'); font-weight: 400; unicode-range: U+0000-00FF,U+2000-206F,U+20BD; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-cyrillic-600-normal.woff2) format('woff2'); font-weight: 600; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+  @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-600-normal.woff2) format('woff2'); font-weight: 600; unicode-range: U+0000-00FF,U+2000-206F,U+20BD; }
+  :root { --text: #f4f3f7; --muted: #a9a7b3; --line: rgba(255,255,255,.12); --bg: #050506; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.7 Onest, system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 80px; }
+  a { color: var(--text); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
+  .back { display: inline-block; margin-bottom: 32px; color: var(--muted); text-decoration: none; }
+  h1 { font-size: 30px; line-height: 1.2; margin-bottom: 8px; }
+  .date { color: var(--muted); margin-bottom: 32px; }
+  h2 { font-size: 18px; margin: 32px 0 10px; padding-top: 24px; border-top: 1px solid var(--line); }
+  p, li { color: #dcdbe2; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: 14px; }
+  td, th { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); color: #dcdbe2; vertical-align: top; }
+  th { color: var(--muted); font-weight: 400; border-top: 0; }
+  code { font-size: 13px; }
+  button { margin-top: 6px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← На главную</a>
+  <h1>Политика cookie</h1>
+  <p class="date">Редакция от 29 октября 2026 года</p>
+
+  <p>Сайт FixVisual не использует рекламные и аналитические cookie, счётчики посещений и трекеры (нет Яндекс Метрики, Google Analytics, пикселей соцсетей). Шрифты лежат на нашем сайте и не загружаются с серверов Google.</p>
+
+  <h2>Что хранится в твоём браузере</h2>
+  <p>Только то, без чего сайт не работает, — в локальном хранилище браузера (localStorage), а не в cookie:</p>
+  <table>
+    <thead><tr><th>Ключ</th><th>Что внутри</th><th>Зачем</th><th>Срок</th></tr></thead>
+    <tbody>
+      <tr><td><code>fv_account</code></td><td>ник и почта аккаунта (пароль не хранится)</td><td>помнить, что ты вошёл</td><td>до нажатия «Выйти»</td></tr>
+      <tr><td><code>fv_notice</code></td><td>отметка «понятно»</td><td>не показывать уведомление о хранилище повторно</td><td>до очистки браузера</td></tr>
+    </tbody>
+  </table>
+  <p>Хостинг сайта (GitHub Pages) может ставить собственные технические cookie для защиты от атак — мы их не читаем и не используем.</p>
+
+  <h2>Как удалить</h2>
+  <p>Нажми «Выйти» на сайте или кнопку ниже — данные сайта в этом браузере сотрутся. Также можно очистить данные сайта в настройках браузера.</p>
+  <button type="button" id="wipe">Стереть данные сайта в этом браузере</button>
+  <p id="done" role="status"></p>
+
+  <p>Подробнее о данных — в <a href="privacy.html">политике конфиденциальности</a>.</p>
+</main>
+<script>
+  document.getElementById('wipe').onclick = () => {
+    try { localStorage.removeItem('fv_account'); localStorage.removeItem('fv_notice'); } catch (e) {}
+    document.getElementById('done').textContent = 'Готово: данные сайта в этом браузере стёрты.';
+  };
+</script>
+</body>
+</html>
