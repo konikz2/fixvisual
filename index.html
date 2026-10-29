@@ -286,6 +286,7 @@
   .price .name { font-weight: 600; }
   .price .sum { font-size: 72px; line-height: 1; margin-top: 14px; }
   .price .sum small { font-family: Inter, sans-serif; font-size: 14px; color: var(--muted); }
+  .price .plans { margin-top: 8px; color: var(--muted); font-size: 14px; }
   .price ul { list-style: none; margin: 22px 0 26px; display: grid; gap: 10px; color: #cfcdd8; font-size: 14px; }
   .price li::before { content: "—"; color: #52525b; margin-right: 10px; }
   .price.hot li::before { color: #a1a1aa; }
@@ -613,7 +614,7 @@
           <a class="btn white big" href="https://github.com/konikz2/FixVisual-updates/releases/latest/download/FixVisualLauncher-Setup.exe">Скачать лаунчер</a>
           <a class="btn big vt" target="_blank" rel="noopener" href="https://www.virustotal.com/gui/url/aHR0cHM6Ly9naXRodWIuY29tL2tvbmlrejIvRml4VmlzdWFsLXVwZGF0ZXMvcmVsZWFzZXMvbGF0ZXN0L2Rvd25sb2FkL0ZpeFZpc3VhbExhdW5jaGVyLVNldHVwLmV4ZQ">VirusTotal ✓</a>
         </div>
-        <p class="hash">SHA-256 aac93b69762de303482525072e9f69240ac81f6d33c429918e9e873b04a1e867</p>
+        <p class="hash">SHA-256 7266ffd88759a14f28bbed3a8a7e294708c00d58a0910c39333e2c819a11454e</p>
       </div>
     </div>
   </section>
@@ -633,10 +634,11 @@
           <a class="btn" href="#download">Скачать</a>
         </div>
         <div class="price hot rv">
-          <div class="name">Спонсор · бета-тест</div>
-          <div class="sum serif">99 ₽ <small>навсегда</small></div>
-          <ul><li>Новые функции раньше всех</li><li>Функция «Спонсор»: префикс в табе и над ником</li><li>9 градиентов на выбор</li><li>Поддержка разработки</li></ul>
-          <button class="btn gold" data-open="buy">Купить за 99 ₽</button>
+          <div class="name">★ Премиум</div>
+          <div class="sum serif">99 ₽ <small>в месяц</small></div>
+          <p class="plans">329 ₽ в год · 449 ₽ навсегда</p>
+          <ul><li>14 премиум-функций: Damage Log, Chat Translate, Clip Buffer, FPS Doctor, Stream Shield и другие</li><li>Префикс «Спонсор» на всех твоих игровых никах</li><li>Работает, когда вошёл в лаунчер своим аккаунтом</li><li>Поддержка разработки</li></ul>
+          <button class="btn gold" data-open="buy">Купить Премиум</button>
         </div>
       </div>
     </div>
@@ -689,12 +691,13 @@
 <div class="modal" id="buy">
   <div class="box">
     <button class="x" data-close>×</button>
-    <h3 class="serif">Спонсор · 99 ₽</h3>
-    <p class="sub">Ранний доступ к обновлениям и функция «Спонсор» — префикс градиентом в табе</p>
+    <h3 class="serif">★ Премиум</h3>
+    <p class="sub">14 премиум-функций и префикс «Спонсор» на всех твоих никах</p>
     <form data-form="buy">
-      <p class="sub">Спонсор выдаётся твоему аккаунту FixVisual — войди перед покупкой.</p>
-      <label class="opt"><input type="radio" name="pay" checked> Карта<span>99 ₽</span></label>
-      <label class="opt"><input type="radio" name="pay"> СБП<span>99 ₽</span></label>
+      <p class="sub">Премиум выдаётся твоему аккаунту FixVisual — войди перед покупкой.</p>
+      <label class="opt"><input type="radio" name="plan" value="month" checked> Месяц<span>99 ₽</span></label>
+      <label class="opt"><input type="radio" name="plan" value="year"> Год<span>329 ₽</span></label>
+      <label class="opt"><input type="radio" name="plan" value="forever"> Навсегда<span>449 ₽</span></label>
       <button class="btn gold">Перейти к оплате</button>
       <p class="note"></p>
     </form>
