@@ -33,7 +33,7 @@
     --dim: #5a5866;
     --line: rgba(255,255,255,.09);
     --line-2: rgba(255,255,255,.16);
-    --solid: rgba(12,11,16,.72);
+    --solid: rgba(12,11,16,.86);
     --accent: #a1a1aa;
     --accent-2: #d4d4d8;
     --good: #d4d4d8;
@@ -77,7 +77,7 @@
 
   /* ===== шапка ===== */
   header { position: fixed; inset: 0 0 auto; z-index: 30; transition: background .3s, border-color .3s; border-bottom: 1px solid transparent; }
-  header.solid { background: rgba(0,0,0,.6); backdrop-filter: blur(14px); border-color: var(--line); }
+  header.solid { background: rgba(6,6,8,.9); border-color: var(--line); }
   .nav { position: relative; display: flex; align-items: center; justify-content: space-between; height: 68px; }
   .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
   .logo i { width: 10px; height: 10px; background: #e4e4e7; transform: rotate(45deg); }
@@ -117,7 +117,7 @@
   .lead { margin-top: 14px; color: #a9a6b4; max-width: 560px; }
   .center { text-align: center; } .center .lead { margin-left: auto; margin-right: auto; }
 
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 22px; background: var(--solid); backdrop-filter: blur(10px); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 22px; background: var(--solid); }
   .stats div { padding: 30px 10px; text-align: center; }
   .stats div + div { border-left: 1px solid var(--line); }
   .stats b { display: block; font-size: 54px; line-height: 1; }
@@ -129,14 +129,14 @@
   .scene-wrap { perspective: 1400px; margin-top: 44px; }
   .scene { position: relative; border-radius: 26px; overflow: hidden; border: 1px solid var(--line); padding: 40px; background: #0a0a0b;
     transform-origin: 50% 100%; will-change: transform; transform: rotateX(var(--bend, 0deg)) scale(var(--sc, 1)); border-top-left-radius: var(--curve, 26px) 60px; border-top-right-radius: var(--curve, 26px) 60px; }
-  .scene::before { content: ""; position: absolute; inset: 0; backdrop-filter: blur(6px); background: rgba(0,0,0,.27); }
+  .scene::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.27); }
   @media (max-width: 900px) { .scene { padding: 10px; } }
   .gw {
     position: relative; display: grid; grid-template-columns: 170px 1fr; grid-template-rows: 1fr 30px; height: 560px;
     border-radius: 18px; border: 1px solid rgba(255,255,255,.31);
     background: linear-gradient(180deg, rgba(38,38,42,.82), rgba(14,14,16,.92));
     box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
-    backdrop-filter: blur(16px); font-size: 13px; color: #dadde6; user-select: none; overflow: hidden;
+    font-size: 13px; color: #dadde6; user-select: none; overflow: hidden;
   }
   .gw::before { content: ""; position: absolute; left: 1px; right: 1px; top: 1px; height: 110px; border-radius: 17px 17px 0 0; background: linear-gradient(rgba(255,255,255,.12), transparent); pointer-events: none; }
   .g-side { position: relative; border-right: 1px solid rgba(255,255,255,.13); padding: 12px 10px; display: flex; flex-direction: column; gap: 3px; }
@@ -211,7 +211,7 @@
   /* ===== свои функции ===== */
   .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
   @media (max-width: 860px) { .feat { grid-template-columns: 1fr; } }
-  .f { padding: 30px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); min-height: 280px; display: flex; flex-direction: column; transition: border-color .25s; }
+  .f { padding: 30px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); min-height: 280px; display: flex; flex-direction: column; transition: border-color .25s; }
   .f:hover { border-color: var(--line-2); }
   .f.wide { grid-column: 1 / -1; }
   .f .n { font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
@@ -271,7 +271,7 @@
   @keyframes up { from { opacity: 0; transform: translateY(8px); } }
 
   /* ===== скачать ===== */
-  .dl { margin: 44px auto 0; max-width: 640px; padding: 34px; border-radius: 24px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); text-align: center; }
+  .dl { margin: 44px auto 0; max-width: 640px; padding: 34px; border-radius: 24px; background: var(--solid); border: 1px solid var(--line); text-align: center; }
   .dl h3 { font-size: 48px; line-height: 1; }
   .dl .meta { margin-top: 10px; color: var(--muted); }
   .dl .actions { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -281,7 +281,7 @@
   /* ===== цены ===== */
   .prices { margin: 44px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 860px; }
   @media (max-width: 760px) { .prices { grid-template-columns: 1fr; } }
-  .price { padding: 32px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); backdrop-filter: blur(10px); display: flex; flex-direction: column; }
+  .price { padding: 32px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); display: flex; flex-direction: column; }
   .price.hot { border-color: rgba(210,210,215,.45); background: radial-gradient(100% 80% at 100% 0%, rgba(210,210,215,.12), transparent 60%), var(--solid); }
   .price .name { font-weight: 600; }
   .price .sum { font-size: 72px; line-height: 1; margin-top: 14px; }
@@ -370,7 +370,7 @@
 
   /* таймлайн внизу: плейхед идёт за прокруткой, ромбы — ключи разделов */
   #tl { position: fixed; left: 50%; bottom: 16px; z-index: 40; width: min(560px, calc(100vw - 32px)); height: 40px; display: flex; align-items: center; gap: 14px;
-    padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: rgba(10,10,12,.78); backdrop-filter: blur(12px);
+    padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: rgba(10,10,12,.92);
     transform: translate(-50%, 150%); opacity: 0; transition: transform .8s var(--ease), opacity .5s; }
   #tl.show { transform: translate(-50%, 0); opacity: 1; }
   #tl .tc { font: 500 11px "JetBrains Mono", monospace; color: #a1a1aa; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
@@ -980,7 +980,8 @@
       let i = -1; LYR.forEach((l, k) => { if (l[0] <= s) i = k; });
       if (i !== lastLine) { lastLine = i; line(i); }
     }
-    (function tick() { render(); requestAnimationFrame(tick); })();
+    // время и строки меняются только во время игры — в паузе плеер не трогает страницу
+    (function tick() { if (playing || drag) render(); requestAnimationFrame(tick); })();
     $('#mp-play').textContent = '▶'; $('#mp-cover').classList.add('paused');
     $('#mp-play').onclick = () => playing ? pause() : play();
     // ушёл со вкладки — музыка на паузу
@@ -1005,6 +1006,9 @@
   });
   let last = performance.now();
   (function fly(t) {
+    requestAnimationFrame(fly);
+    // слова плывут медленно — 30 кадров в секунду глазу не отличить, а работы вдвое меньше
+    if (t - last < 32) return;
     const dt = Math.min(50, t - last); last = t;
     const W = innerWidth, H = innerHeight, span = H * 1.2;
     flyers.forEach(f => {
@@ -1013,9 +1017,8 @@
       // дальние слова при прокрутке едут медленнее — глубина
       let py = (f.y * span - scrollY * .12 * f.z) % span;
       if (py < 0) py += span;
-      f.el.style.transform = `translate(${f.x * W}px, ${py - H * .1}px) rotate(${f.r}deg)`;
+      f.el.style.transform = `translate3d(${(f.x * W).toFixed(1)}px, ${(py - H * .1).toFixed(1)}px, 0) rotate(${f.r}deg)`;
     });
-    requestAnimationFrame(fly);
   })(last);
 
   // ===================== огонь (WebGL) =====================
@@ -1029,7 +1032,7 @@
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
         return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
       void main(){
         vec2 uv=gl_FragCoord.xy/R; vec2 q=vec2(uv.x*R.x/R.y,uv.y);
         // языки пламени поднимаются снизу и завихряются
@@ -1060,16 +1063,22 @@
     const loc = gl.getAttribLocation(pr, 'p');
     gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const uR = gl.getUniformLocation(pr, 'R'), uT = gl.getUniformLocation(pr, 'T');
+    // треть разрешения (огонь всё равно мягкий и размытый) и не больше 960 точек по ширине
     function size() {
-      // половинное разрешение: огонь мягче, а видеокарте легче
-      cv.width = Math.max(1, innerWidth * .5); cv.height = Math.max(1, innerHeight * .5);
+      const k = Math.min(1 / 3, 960 / Math.max(1, innerWidth));
+      cv.width = Math.max(1, Math.round(innerWidth * k)); cv.height = Math.max(1, Math.round(innerHeight * k));
       gl.viewport(0, 0, cv.width, cv.height);
+      gl.uniform2f(uR, cv.width, cv.height);
     }
     size(); addEventListener('resize', size);
+    // 30 кадров в секунду и пауза на скрытой вкладке
+    let lastDraw = -1e9;
     (function loop(t) {
-      gl.uniform2f(uR, cv.width, cv.height); gl.uniform1f(uT, t / 1000);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       requestAnimationFrame(loop);
+      if (document.hidden || t - lastDraw < 32) return;
+      lastDraw = t;
+      gl.uniform1f(uT, t / 1000);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     })(0);
   })();
 
@@ -1093,7 +1102,13 @@
   addEventListener('scroll', bend, { passive: true });
   addEventListener('resize', bend);
   bend();
-  (function g() { gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = `translate(${gx}px, ${gy}px)`; requestAnimationFrame(g); })();
+  // свечение двигается, только пока не догнало курсор
+  (function g() {
+    requestAnimationFrame(g);
+    if (Math.abs(tx - gx) + Math.abs(ty - gy) < .5) return;
+    gx += (tx - gx) * .12; gy += (ty - gy) * .12;
+    glow.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+  })();
 
   // ===================== прочее =====================
   addEventListener('scroll', () => $('#hdr').classList.toggle('solid', scrollY > 40), { passive: true });
@@ -1337,55 +1352,74 @@
     });
 
     if (calm) return;
-    const secs = [...document.querySelectorAll('main > section')].map(el => ({ el, last: '' }));
+    // размеры читаются только при изменении окна — в кадре одни записи, без пересчёта раскладки
+    const secs = [...document.querySelectorAll('main > section')].map(el => ({ el, top: 0, h: 0, last: '' }));
     const h1 = $('.hero h1'), heroWrap = $('.hero .wrap'), graph = $('#graph');
     const words = [...h1.querySelectorAll('.w')];
-    let lastY = scrollY, vel = 0, t0 = performance.now();
+    let H = innerHeight;
+    const measure = () => {
+      H = innerHeight;
+      secs.forEach(o => { o.top = o.el.offsetTop; o.h = o.el.offsetHeight; o.last = ''; });
+      bands.forEach(b => b.half = b.bt.scrollWidth / 2);
+    };
+    measure();
+    addEventListener('resize', measure);
+    addEventListener('load', measure);
+    if (document.fonts) document.fonts.ready.then(measure);
+    // бегущие строки двигаются, только пока видны
+    const seen = new IntersectionObserver(list => list.forEach(x => x.target._b.on = x.isIntersecting));
+    bands.forEach(b => { b.band._b = b; seen.observe(b.band); });
+
+    let lastY = -1, vel = 0, t0 = performance.now(), heroDone = false;
     (function frame(now) {
+      requestAnimationFrame(frame);
       const dt = Math.min(50, now - t0);
       t0 = now;
-      const H = innerHeight;
-      vel += ((scrollY - lastY) - vel) * .2;
-      lastY = scrollY;
+      const y = scrollY;
+      vel += ((lastY < 0 ? 0 : y - lastY) - vel) * .2;
+      const moved = y !== lastY;
+      lastY = y;
 
-      // главный экран разъезжается: слова в стороны, график приближается
-      const s = clamp(scrollY / H, 0, 1);
-      if (s < 1) {
-        words.forEach((w, i) => w.style.transform = `translateX(${(i - (words.length - 1) / 2) * s * 140}px)`);
-        heroWrap.style.transform = `translateY(${s * H * .28}px)`;
-        heroWrap.style.opacity = 1 - s * 1.1;
-        graph.style.transform = `scale(${1 + s * .35}) rotate(${s * -4}deg)`;
-      }
-
-      // разделы: вход (e) и уход (q)
-      secs.forEach(o => {
-        const r = o.el.getBoundingClientRect();
-        let e = clamp((H - r.top) / (H * .8), 0, 1);
-        e = 1 - Math.pow(1 - e, 3);
-        const q = clamp(1 - r.bottom / (H * .55), 0, 1);
-        const key = e.toFixed(3) + q.toFixed(3);
-        if (key === o.last) return;
-        o.last = key;
-        if (e >= 1 && q <= 0) {
-          o.el.style.transform = o.el.style.borderRadius = '';
-          o.el.style.setProperty('--dim', 0);
-          return;
+      if (moved) {
+        // главный экран разъезжается: слова в стороны, график приближается
+        const s = clamp(y / H, 0, 1);
+        if (s < 1 || !heroDone) {
+          heroDone = s >= 1;
+          words.forEach((w, i) => w.style.transform = `translateX(${(i - (words.length - 1) / 2) * s * 140}px)`);
+          heroWrap.style.transform = `translateY(${s * H * .28}px)`;
+          heroWrap.style.opacity = Math.max(0, 1 - s * 1.1);
+          graph.style.transform = `scale(${1 + s * .35}) rotate(${s * -4}deg)`;
         }
-        const k = 1 - e;
-        o.el.style.transform = `perspective(1600px) translateY(${k * 110}px) rotateX(${k * 10}deg) scale(${(.94 + .06 * e) * (1 - q * .08)})`;
-        o.el.style.borderRadius = `${k * 64}px ${k * 64}px 0 0`;
-        o.el.style.setProperty('--dim', (q * .65).toFixed(3));
-      });
+
+        // разделы: вход (e) и уход (q)
+        secs.forEach(o => {
+          const top = o.top - y, bottom = top + o.h;
+          let e = clamp((H - top) / (H * .8), 0, 1);
+          e = 1 - Math.pow(1 - e, 3);
+          const q = clamp(1 - bottom / (H * .55), 0, 1);
+          const key = e.toFixed(3) + q.toFixed(3);
+          if (key === o.last) return;
+          o.last = key;
+          if ((e >= 1 && q <= 0) || top > H || bottom < 0) {
+            o.el.style.transform = o.el.style.willChange = '';
+            o.el.style.setProperty('--dim', 0);
+            return;
+          }
+          const k = 1 - e;
+          o.el.style.willChange = 'transform';
+          o.el.style.transform = `perspective(1600px) translateY(${(k * 110).toFixed(1)}px) rotateX(${(k * 10).toFixed(2)}deg) scale(${((.94 + .06 * e) * (1 - q * .08)).toFixed(4)})`;
+          o.el.style.setProperty('--dim', (q * .65).toFixed(3));
+        });
+      }
 
       // бегущие строки: своя скорость + скорость прокрутки, наклон от рывка
       const skew = clamp(vel * .35, -14, 14);
       bands.forEach(b => {
-        const half = b.bt.scrollWidth / 2;
-        b.x = (b.x + b.dir * (dt * .05 + Math.abs(vel) * .6)) % half;
-        if (b.x > 0) b.x -= half;
-        b.bt.style.transform = `translateX(${b.x}px) skewX(${b.dir * skew}deg)`;
+        if (!b.on || !b.half) return;
+        b.x = (b.x + b.dir * (dt * .05 + Math.abs(vel) * .6)) % b.half;
+        if (b.x > 0) b.x -= b.half;
+        b.bt.style.transform = `translate3d(${b.x.toFixed(1)}px,0,0) skewX(${(b.dir * skew).toFixed(2)}deg)`;
       });
-      requestAnimationFrame(frame);
     })(t0);
   })();
 
