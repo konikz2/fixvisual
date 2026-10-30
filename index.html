@@ -711,7 +711,8 @@
       <label class="opt"><input type="radio" name="plan" value="forever"> Навсегда<span>449 ₽</span></label>
       <p class="final">Цена окончательная: без комиссий и без автопродления. 14 дней — возврат всей суммы.</p>
       <label class="agree"><input type="checkbox" name="terms" required> <span>Принимаю <a href="terms.html#refund" target="_blank">условия покупки и возврата</a></span></label>
-      <button class="btn gold">Перейти к оплате</button>
+      <button class="btn gold">Оплатить по СБП</button>
+      <p class="legal">Оплата через Систему быстрых платежей в приложении твоего банка — платёж принимает ЮKassa, данные карты и счёта мы не видим. Чек придёт на почту аккаунта.</p>
       <p class="legal">Есть код? <a href="#" data-redeem-link>Активировать код</a></p>
       <p class="note"></p>
     </form>
@@ -1498,11 +1499,6 @@
     n.querySelector('button').onclick = () => { try { localStorage.setItem('fv_notice', '1'); } catch (e) {} n.remove(); };
     document.body.append(n);
   })();
-  // оплата пока не подключена
-  $('[data-form="buy"]').onsubmit = e => {
-    e.preventDefault();
-    e.target.querySelector('.note').textContent = 'Оплата скоро заработает — следи в Telegram';
-  };
 </script>
 
 <!-- ===================== аккаунты (свой сервер) ===================== -->
@@ -1660,7 +1656,58 @@
       btn.disabled = false;
     };
 
+    // ===== покупка Премиума по СБП =====
+    const PLAN_NAME = { month: 'на месяц', year: 'на год', forever: 'навсегда' };
+    const bf = q('[data-form="buy"]');
+    bf.onsubmit = async e => {
+      e.preventDefault();
+      const a = saved();
+      if (!a) {
+        note(bf, 'Сначала войди в аккаунт — Премиум выдаётся ему');
+        window.fvClose(document.getElementById('buy'));
+        setTimeout(() => openAuth('login'), 460);
+        return;
+      }
+      const btn = bf.querySelector('button.gold');
+      btn.disabled = true; note(bf, 'Создаю оплату…');
+      try {
+        const r = await call('POST', '/pay', { plan: bf.plan.value }, a.token);
+        note(bf, 'Открываю оплату…');
+        location.href = r.url;
+      } catch (err) {
+        if (err.message.startsWith('Вход устарел') || err.message.startsWith('Нужно войти')) { save(null); showAccount(); }
+        note(bf, err.message);
+        btn.disabled = false;
+      }
+    };
+
+    // возврат с оплаты: …/fixvisual/#paid=номер — показываем, прошла ли она
+    async function checkPaid(order, tries) {
+      window.fvOpen('buy');
+      note(bf, 'Проверяю оплату…');
+      try {
+        const r = await call('GET', '/pay/' + encodeURIComponent(order));
+        if (r.status === 'succeeded') {
+          note(bf, '★ Оплата прошла! Премиум ' + PLAN_NAME[r.plan] + ' у «' + r.nick + '»'
+            + (r.premiumUntil ? ' — до ' + new Date(r.premiumUntil).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '')
+            + '. Зайди в лаунчер под этим аккаунтом и запусти игру.');
+          history.replaceState(null, '', location.pathname);
+          showAccount();
+        } else if (r.status === 'canceled') {
+          note(bf, 'Оплата отменена — деньги не списаны. Можно попробовать ещё раз.');
+          history.replaceState(null, '', location.pathname);
+        } else if (tries > 0) {
+          note(bf, 'Ждём подтверждения от банка…');
+          setTimeout(() => checkPaid(order, tries - 1), 4000);
+        } else {
+          note(bf, 'Банк ещё не подтвердил оплату. Премиум включится сам, как только подтвердит, — обнови страницу через пару минут.');
+        }
+      } catch (err) { note(bf, err.message); }
+    }
+
     showAccount();
+    const paid = location.hash.match(/^#paid=([0-9a-f]{24})$/);
+    if (paid) checkPaid(paid[1], 8);
     // из лаунчера: …/fixvisual/#register — сразу окно регистрации, #login — входа
     if (location.hash === '#register' || location.hash === '#login') openAuth(location.hash.slice(1));
   })();
