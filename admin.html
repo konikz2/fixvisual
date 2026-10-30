@@ -74,6 +74,12 @@
       <table><thead><tr><th>Ник</th><th>До</th></tr></thead><tbody id="list"></tbody></table>
     </div>
 
+    <div class="card">
+      <div class="who" style="margin-bottom:6px"><span>Оплаты по СБП</span><button class="ghost" id="reloadPays" type="button">Обновить</button></div>
+      <table><thead><tr><th>Ник</th><th>Тариф</th><th>Сумма</th><th>Когда</th></tr></thead><tbody id="pays"></tbody></table>
+      <p class="note">Возврат — в личном кабинете ЮKassa по номеру платежа (наведи на дату), потом сними Премиум формой выше.</p>
+    </div>
+
     <form class="card" id="mkcodes">
       <div class="who" style="margin-bottom:12px"><span><b>Коды на Премиум</b> — игрок вводит код на сайте, Премиум выдаётся его аккаунту</span></div>
       <div class="row">
@@ -138,6 +144,7 @@
       $('#me').textContent = myNick;
       f.hidden = true; $('#panel').hidden = false;
       loadList();
+      loadPays();
       loadCodes();
     } catch (err) { note(f, err.message, 'bad'); }
     btn.disabled = false;
@@ -188,6 +195,24 @@
     } catch (err) { failRow(body, 2, err); }
   }
   $('#reload').onclick = loadList;
+
+  const TARIFF = { month: 'Месяц', year: 'Год', forever: 'Навсегда' };
+  async function loadPays() {
+    const body = $('#pays');
+    body.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Загрузка…</td></tr>';
+    try {
+      const items = await req('GET', '/admin/payments');
+      body.innerHTML = '';
+      if (!items.length) body.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Оплат пока нет</td></tr>';
+      for (const it of items) {
+        const tr = document.createElement('tr');
+        const cells = [it.nick, TARIFF[it.plan] || it.plan, it.amount + ' ₽', fmt(it.at)].map(t => { const td = document.createElement('td'); td.textContent = t; return td; });
+        cells[3].className = 'until'; cells[3].title = 'Платёж ЮKassa: ' + it.id;
+        tr.append(...cells); body.append(tr);
+      }
+    } catch (err) { failRow(body, 4, err); }
+  }
+  $('#reloadPays').onclick = loadPays;
 
   // ---------- коды ----------
   const PLAN = d => d === 0 ? 'Навсегда' : d === 365 ? 'Год' : d === 30 ? 'Месяц' : d + ' дн.';
