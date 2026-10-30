@@ -1505,89 +1505,55 @@
   };
 </script>
 
-<!-- ===================== аккаунты (Firebase) ===================== -->
+<!-- ===================== аккаунты (свой сервер) ===================== -->
 <script>
   // ===================== аккаунты FixVisual =====================
-  // Без библиотеки Firebase (её адрес gstatic.com в России часто не открывается) — прямые запросы к Firebase,
-  // как в лаунчере. Аккаунты общие: сайт, лаунчер и игра.
+  // Свой сервер в России (Selectel) — без Google. Аккаунты общие: сайт, лаунчер и игра.
   (() => {
-    const KEY = 'AIzaSyBIlXmEGK4F7vBmEFSVEdeEBDyJD-zt1Ck';
-    const AUTH = 'https://identitytoolkit.googleapis.com/v1/accounts:';
-    const DB = 'https://firestore.googleapis.com/v1/projects/fixvisual-74ed4/databases/(default)/documents/';
-    const DOCS = 'projects/fixvisual-74ed4/databases/(default)/documents/';
+    const API = 'https://176.114.69.58/api';
     const q = s => document.querySelector(s);
     const note = (form, t) => { form.querySelector('.note').textContent = t; };
-
-    const ERR = {
-      EMAIL_EXISTS: 'Эта почта уже зарегистрирована — войди',
-      INVALID_EMAIL: 'Неверная почта',
-      WEAK_PASSWORD: 'Пароль слишком простой (от 6 символов)',
-      INVALID_LOGIN_CREDENTIALS: 'Неверная почта или пароль',
-      INVALID_PASSWORD: 'Неверная почта или пароль',
-      EMAIL_NOT_FOUND: 'Неверная почта или пароль',
-      TOO_MANY_ATTEMPTS_TRY_LATER: 'Слишком много попыток, подожди немного',
-      USER_DISABLED: 'Аккаунт заблокирован'
-    };
     class Fail extends Error {}
 
-    async function call(url, body, token) {
+    async function call(method, path, body, token) {
       let r;
       try {
-        r = await fetch(url, {
-          method: body ? 'POST' : 'GET',
-          headers: Object.assign({ 'Content-Type': 'application/json', 'X-Firebase-Locale': 'ru' }, token ? { Authorization: 'Bearer ' + token } : {}),
+        r = await fetch(API + path, {
+          method,
+          headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}),
           body: body ? JSON.stringify(body) : undefined
         });
       } catch (e) { throw new Fail('Нет связи с сервером'); }
-      if (r.status === 404 && url.startsWith(DB)) return null;
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        const code = (j.error && j.error.message) || String(r.status);
-        if (url.startsWith(DB)) throw new Fail(r.status === 403 || r.status === 409 ? 'Ник уже занят' : 'Ошибка базы: ' + code);
-        throw new Fail(ERR[code.split(' ')[0]] || ('Ошибка: ' + code));
-      }
+      if (!r.ok) throw new Fail(j.error || ('Ошибка: ' + r.status));
       return j;
     }
-    const doc = (path, token) => call(DB + path, null, token);
 
-    // ник закрепляется при первом входе с подтверждённой почтой: первый, кто подтвердил, — тот и владелец
-    async function claimNick(token, uid, wanted) {
-      const mine = await doc('users/' + uid, token);
-      if (mine) return mine.fields.nick.stringValue;
-      if (!/^[A-Za-z0-9_]{3,16}$/.test(wanted || '')) throw new Fail('У аккаунта нет ника — зарегистрируйся заново');
-      try {
-        await call(DB.replace(/\/$/, '') + ':commit', { writes: [
-          { update: { name: DOCS + 'nicks/' + wanted.toLowerCase(), fields: { uid: { stringValue: uid } } }, currentDocument: { exists: false } },
-          { update: { name: DOCS + 'users/' + uid, fields: { nick: { stringValue: wanted }, created: { timestampValue: new Date().toISOString() } } },
-            currentDocument: { exists: false } }
-        ] }, token);
-      } catch (e) { throw new Fail('Ник «' + wanted + '» уже занят — зарегистрируй аккаунт с другим ником'); }
-      return wanted;
-    }
-
-    // вход запоминается в этом браузере (только ник и почта — пароль не хранится)
+    // вход запоминается в этом браузере (ник, почта и ключ входа — пароль не хранится)
     const saved = () => { try { return JSON.parse(localStorage.getItem('fv_account') || 'null'); } catch (e) { return null; } };
     const save = v => { try { v ? localStorage.setItem('fv_account', JSON.stringify(v)) : localStorage.removeItem('fv_account'); } catch (e) {} };
 
     async function showAccount() {
       const right = q('.nav .right');
-      const a = saved();
+      let a = saved();
+      // вход со старой базы (без ключа) — просим войти заново
+      if (a && !a.token) { save(null); a = null; }
       if (!a) {
         right.innerHTML = '<button class="btn" data-acc="login">Войти</button><button class="btn white" data-acc="register">Регистрация</button>';
         right.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => openAuth(b.dataset.acc, b));
         return;
       }
-      let tags = '';
-      try {
-        const g = await doc('grants/' + a.nick.toLowerCase());
-        if (g && g.fields) {
-          if (g.fields.admin && g.fields.admin.booleanValue) tags += ' · Админ';
-          if (g.fields.sponsor && g.fields.sponsor.booleanValue) tags += ' · Спонсор';
-        }
-      } catch (e) { /* без прав */ }
-      right.innerHTML = '<span class="btn" style="cursor:default">' + a.nick.replace(/</g, '&lt;') + tags + '</span><button class="btn" data-acc="del">Удалить мои данные</button><button class="btn" data-acc="out">Выйти</button>';
-      right.querySelector('[data-acc="out"]').onclick = () => { save(null); showAccount(); };
-      right.querySelector('[data-acc="del"]').onclick = e => openDelete(e.currentTarget);
+      const draw = me => {
+        let tags = '';
+        if (me && me.admin) tags += ' · Админ';
+        if (me && me.sponsor) tags += ' · Спонсор';
+        right.innerHTML = '<span class="btn" style="cursor:default">' + a.nick.replace(/</g, '&lt;') + tags + '</span><button class="btn" data-acc="del">Удалить мои данные</button><button class="btn" data-acc="out">Выйти</button>';
+        right.querySelector('[data-acc="out"]').onclick = () => { call('POST', '/logout', null, a.token).catch(() => {}); save(null); showAccount(); };
+        right.querySelector('[data-acc="del"]').onclick = e => openDelete(e.currentTarget);
+      };
+      draw(null);
+      try { draw(await call('GET', '/me', null, a.token)); }
+      catch (e) { if (e.message.startsWith('Вход устарел') || e.message.startsWith('Нужно войти')) { save(null); showAccount(); } }
     }
 
     // «Удалить мои данные»: окно входа с подсказкой — почта, пароль, подтверждение
@@ -1606,42 +1572,45 @@
       window.fvOpen('auth', from);
     }
 
+    async function signIn(email, password) {
+      const r = await call('POST', '/login', { email, password });
+      save({ nick: r.nick, email: r.email, token: r.token });
+      return r;
+    }
+
     q('[data-form="register"]').onsubmit = async e => {
       e.preventDefault();
       const f = e.target, nick = f.nick.value.trim(), email = f.email.value.trim();
       if (!/^[A-Za-z0-9_]{3,16}$/.test(nick)) return note(f, 'Ник: 3–16 символов, латиница, цифры и _');
       note(f, 'Проверяю ник…');
       try {
-        if (await doc('nicks/' + nick.toLowerCase())) return note(f, 'Ник «' + nick + '» уже занят');
-        const r = await call(AUTH + 'signUp?key=' + KEY, { email, password: f.password.value, returnSecureToken: true });
-        await call(AUTH + 'update?key=' + KEY, { idToken: r.idToken, displayName: nick, returnSecureToken: false });
-        await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'VERIFY_EMAIL', idToken: r.idToken });
+        if (!(await call('GET', '/nick/' + encodeURIComponent(nick))).free) return note(f, 'Ник «' + nick + '» уже занят');
+        const r = await call('POST', '/register', { nick, email, password: f.password.value });
+        if (r.verify) {
+          f.password.value = '';
+          return note(f, 'Готово! Письмо отправлено на ' + email + ' — подтверди почту по ссылке (проверь и «Спам»), потом войди');
+        }
+        await signIn(email, f.password.value);
         f.password.value = '';
-        note(f, 'Готово! Письмо отправлено на ' + email + ' — подтверди почту по ссылке (проверь и «Спам»), потом войди');
+        note(f, 'Готово! Аккаунт «' + nick + '» создан — входи с этой почтой и паролем в лаунчере');
+        showAccount();
       } catch (err) { note(f, err.message); }
     };
 
     q('[data-form="login"]').onsubmit = async e => {
       e.preventDefault();
-      const f = e.target, email = f.email.value.trim();
+      const f = e.target;
       note(f, 'Вхожу…');
       try {
-        const r = await call(AUTH + 'signInWithPassword?key=' + KEY, { email, password: f.password.value, returnSecureToken: true });
-        const info = await call(AUTH + 'lookup?key=' + KEY, { idToken: r.idToken });
-        const u = info.users[0];
-        if (!u.emailVerified) {
-          await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'VERIFY_EMAIL', idToken: r.idToken }).catch(() => {});
-          return note(f, 'Сначала подтверди почту — письмо отправлено ещё раз (проверь «Спам»)');
-        }
-        const nick = await claimNick(r.idToken, r.localId, u.displayName);
-        save({ nick, email });
-        note(f, 'Привет, ' + nick + '!');
+        const r = await signIn(f.email.value.trim(), f.password.value);
+        f.password.value = '';
+        note(f, 'Привет, ' + r.nick + '!');
         setTimeout(() => window.fvClose(document.getElementById('auth')), 700);
         showAccount();
       } catch (err) { note(f, err.message); }
     };
 
-    // отзыв согласия: аккаунт, ник и сессия удаляются насовсем (нужны почта и пароль во вкладке «Вход»)
+    // отзыв согласия: аккаунт, ник, права и сессия удаляются насовсем (нужны почта и пароль во вкладке «Вход»)
     q('[data-acc="delete"]').onclick = async e => {
       e.preventDefault();
       const f = q('[data-form="login"]'), email = f.email.value.trim();
@@ -1649,15 +1618,7 @@
       if (!confirm('Удалить аккаунт ' + email + ' и все его данные насовсем? Ник освободится, Премиум и спонсорство пропадут.')) return;
       note(f, 'Удаляю…');
       try {
-        const r = await call(AUTH + 'signInWithPassword?key=' + KEY, { email, password: f.password.value, returnSecureToken: true });
-        const mine = await doc('users/' + r.localId, r.idToken);
-        if (mine) {
-          const nick = mine.fields.nick.stringValue.toLowerCase();
-          await call(DB.replace(/\/$/, '') + ':commit', { writes: [
-            { delete: DOCS + 'sessions/' + nick }, { delete: DOCS + 'nicks/' + nick }, { delete: DOCS + 'users/' + r.localId }
-          ] }, r.idToken);
-        }
-        await call(AUTH + 'delete?key=' + KEY, { idToken: r.idToken });
+        await call('POST', '/account/delete', { email, password: f.password.value });
         save(null);
         f.password.value = '';
         note(f, 'Аккаунт и все его данные удалены');
@@ -1670,9 +1631,9 @@
       const f = q('[data-form="login"]'), email = f.email.value.trim();
       if (!email) return note(f, 'Введи почту выше — пришлём ссылку для нового пароля');
       try {
-        await call(AUTH + 'sendOobCode?key=' + KEY, { requestType: 'PASSWORD_RESET', email });
+        await call('POST', '/password/reset', { email });
         note(f, 'Если аккаунт с этой почтой есть, письмо со ссылкой уже отправлено (проверь «Спам»)');
-      } catch (err) { note(f, err.message === 'Неверная почта или пароль' ? 'Письмо отправлено, если аккаунт существует' : err.message); }
+      } catch (err) { note(f, err.message); }
     };
 
     // ===== коды на Премиум =====
@@ -1689,39 +1650,11 @@
       const btn = rf.querySelector('button.gold');
       btn.disabled = true; note(rf, 'Проверяю код…');
       try {
-        const r = await call(AUTH + 'signInWithPassword?key=' + KEY, { email, password: rf.password.value, returnSecureToken: true });
-        const me = await doc('users/' + r.localId, r.idToken);
-        if (!me) throw new Fail('Сначала войди на сайте один раз — чтобы закрепить ник за аккаунтом');
-        const nick = me.fields.nick.stringValue, lower = nick.toLowerCase();
-        let c;
-        try { c = await doc('codes/' + code, r.idToken); } catch (err) { throw new Fail('Не удалось проверить код — подтверди почту и попробуй снова'); }
-        if (!c) throw new Fail('Такого кода нет — проверь, нет ли опечатки');
-        if (c.fields.used.booleanValue) throw new Fail('Этот код уже активирован');
-        const days = +c.fields.days.integerValue;
-        const g = await doc('grants/' + lower);
-        const gf = (g && g.fields) || {};
-        const had = gf.premium && gf.premium.booleanValue;
-        if (had && !gf.premiumUntil) throw new Fail('У тебя уже Премиум навсегда — код можно подарить другу');
-        const now = new Date().toISOString();
-        const fields = { premium: { booleanValue: true }, premiumCode: { stringValue: code }, premiumBy: { stringValue: 'code' }, premiumAt: { timestampValue: now } };
-        let until = 0;
-        if (days > 0) {
-          const base = had && gf.premiumUntil ? Math.max(Date.now(), Date.parse(gf.premiumUntil.timestampValue)) : Date.now();
-          until = base + days * 86400000;
-          fields.premiumUntil = { timestampValue: new Date(until).toISOString() };
-        }
-        const mask = f => ({ fieldPaths: f });
-        try {
-          await call(DB.replace(/\/$/, '') + ':commit', { writes: [
-            { update: { name: DOCS + 'codes/' + code, fields: { used: { booleanValue: true }, usedBy: { stringValue: lower }, usedAt: { timestampValue: now } } },
-              updateMask: mask(['used', 'usedBy', 'usedAt']), currentDocument: { exists: true } },
-            { update: { name: DOCS + 'grants/' + lower, fields }, updateMask: mask(['premium', 'premiumUntil', 'premiumCode', 'premiumBy', 'premiumAt']) }
-          ] }, r.idToken);
-        } catch (err) { throw new Fail('Код не принят — возможно, его только что активировали. Попробуй ещё раз'); }
+        const me = await signIn(email, rf.password.value);
+        const r = await call('POST', '/redeem', { code }, me.token);
         rf.password.value = ''; rf.code.value = '';
-        note(rf, '★ Премиум активирован для «' + nick + '» ' + (days ? 'до ' + new Date(until).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'навсегда')
+        note(rf, '★ Премиум активирован для «' + r.nick + '» ' + (r.premiumUntil ? 'до ' + new Date(r.premiumUntil).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'навсегда')
           + '. Зайди в лаунчер под этим аккаунтом и запусти игру.');
-        save({ nick, email });
         showAccount();
       } catch (err) { note(rf, err.message); }
       btn.disabled = false;
