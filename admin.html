@@ -39,6 +39,10 @@
   td.until.off { color: var(--bad); }
   textarea { display: block; width: 100%; margin: 14px 0 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #08080a; color: var(--text); font: 16px/1.6 ui-monospace, Consolas, monospace; resize: vertical; }
   [hidden] { display: none !important; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .stat { padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: #0b0b0e; }
+  .stat b { display: block; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.35; }
 </style>
 </head>
 <body>
@@ -56,6 +60,11 @@
 
   <section id="panel" hidden>
     <div class="who"><span>Вошёл как <b id="me"></b></span><button class="ghost" id="logout" type="button">Выйти</button></div>
+    <div class="card">
+      <div class="who" style="margin-bottom:10px"><span><b>Статистика</b></span><button class="ghost" id="reloadStats" type="button">Обновить</button></div>
+      <div class="stats" id="stats"><div class="stat"><b>…</b><span>загрузка</span></div></div>
+      <p class="note" id="statsNote"></p>
+    </div>
     <form class="card" id="grant">
       <label>Ник аккаунта FixVisual<input name="nick" required minlength="3" maxlength="16" pattern="[A-Za-z0-9_]{3,16}" autocomplete="off"></label>
       <label>Срок
@@ -143,6 +152,7 @@
       f.password.value = '';
       $('#me').textContent = myNick;
       f.hidden = true; $('#panel').hidden = false;
+      loadStats();
       loadList();
       loadPays();
       loadCodes();
@@ -176,6 +186,35 @@
     body.innerHTML = '';
     const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="' + cols + '"></td>'; tr.firstChild.textContent = err.message; body.append(tr);
   }
+
+  async function loadStats() {
+    const box = $('#stats');
+    try {
+      const s = await req('GET', '/admin/stats');
+      const d = s.downloads || {};
+      const n = v => (v || 0).toLocaleString('ru-RU');
+      const items = [
+        [n(d.launcher), 'скачиваний лаунчера'],
+        [n(d.jar), 'скачиваний мода .jar'],
+        [n(d.latestLauncher), 'лаунчер ' + (d.latest || 'последней версии')],
+        [n(s.accounts), 'регистраций всего'],
+        [n(s.accountsDay), 'регистраций за сутки'],
+        [n(s.accountsWeek), 'регистраций за неделю'],
+        [n(s.launchedDay), 'запускали игру за сутки'],
+        [n(s.onlineNow), 'в игре сейчас'],
+        [n(s.premium), 'с Премиумом'],
+      ];
+      box.innerHTML = '';
+      for (const [v, l] of items) {
+        const el = document.createElement('div'); el.className = 'stat';
+        const b = document.createElement('b'); b.textContent = v;
+        const sp = document.createElement('span'); sp.textContent = l;
+        el.append(b, sp); box.append(el);
+      }
+      $('#statsNote').textContent = d.ok ? 'Скачивания — по всем релизам на GitHub (обновляются раз в 10 минут).' : 'GitHub не ответил — скачивания не обновились.';
+    } catch (err) { box.textContent = err.message; }
+  }
+  $('#reloadStats').onclick = loadStats;
 
   async function loadList() {
     const body = $('#list');
