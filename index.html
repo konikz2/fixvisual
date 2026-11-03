@@ -300,9 +300,8 @@
   .gifts-top { margin: 34px auto 0; max-width: 860px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
   .gifts-top .chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--solid); font-size: 14px; color: #cfcdd8; }
   .gifts-top .chip b { color: var(--text); }
-  .gcards { margin: 26px auto 0; max-width: 860px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 760px) { .gcards { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 480px) { .gcards { grid-template-columns: 1fr; } }
+  /* одна карточка в день, неоткрытые живут 3 дня — от одной до трёх, по центру */
+  .gcards { margin: 26px auto 0; max-width: 860px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 270px)); justify-content: center; gap: 16px; }
   .gcard { perspective: 900px; height: 210px; cursor: pointer; border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: center; }
   .gcard:disabled { cursor: default; }
   .gcard .in { position: relative; width: 100%; height: 100%; transition: transform .8s var(--ease, ease); transform-style: preserve-3d; }
@@ -311,11 +310,18 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px; }
   .gcard .front { background: radial-gradient(120% 90% at 0% 0%, rgba(255,255,255,.12), transparent 55%), linear-gradient(160deg, #1b1a22, #0d0c12); }
   .gcard:not(:disabled):hover .front { border-color: rgba(255,255,255,.35); box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 18px 50px rgba(0,0,0,.45); }
-  .gcard .front .ico { font-size: 44px; filter: drop-shadow(0 0 18px rgba(255,255,255,.25)); }
+  /* коробка с лентой — без эмодзи */
+  .gcard .front .box { position: relative; width: 58px; height: 46px; margin-bottom: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,.28);
+    background: linear-gradient(160deg, rgba(255,255,255,.14), rgba(255,255,255,.03)); box-shadow: 0 0 34px rgba(255,255,255,.08); }
+  .gcard .front .box::before { content: ''; position: absolute; left: 50%; top: -1px; bottom: -1px; width: 8px; margin-left: -4px; background: rgba(255,255,255,.55); }
+  .gcard .front .box::after { content: ''; position: absolute; left: -1px; right: -1px; top: 14px; height: 6px; background: rgba(255,255,255,.4); }
+  .gcard:not(:disabled):hover .front .box { animation: boxwiggle .6s ease; }
+  @keyframes boxwiggle { 25% { transform: rotate(-6deg); } 60% { transform: rotate(5deg); } }
   .gcard .front .t { font-weight: 600; }
   .gcard .front .s, .gcard .back .s { font-size: 13px; color: var(--muted); }
   .gcard .back { transform: rotateY(180deg); background: radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.14), transparent 60%), #121118; }
-  .gcard .back .ico { font-size: 38px; }
+  .gcard .back .kind { font: 500 11px "JetBrains Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .gcard.rare .back .kind { color: #facc15; }
   .gcard .back .t { font-size: 20px; font-weight: 600; }
   .gcard.rare .back { border-color: rgba(250,204,21,.6); box-shadow: 0 0 40px rgba(250,204,21,.18) inset; }
   .gcard.empty .back { opacity: .7; }
@@ -746,8 +752,8 @@
     <div class="wrap">
       <div class="center rv">
         <div class="kicker">Подарки</div>
-        <h2 class="serif title">Три карточки каждый день</h2>
-        <p class="lead">Заходи раз в день и открывай карточки: Премиум, деньги на баланс, свой префикс или скидка. Карточка живёт 3 дня.</p>
+        <h2 class="serif title">Карточка каждый день</h2>
+        <p class="lead">Заходи раз в день и открывай подарочную карточку: Премиум, деньги на баланс, свой префикс или скидка. Карточка живёт 3 дня — успей открыть.</p>
       </div>
       <div class="gifts-top" data-gifts-top></div>
       <div class="gcards" data-gifts></div>
@@ -1811,8 +1817,8 @@
     document.querySelectorAll('[data-open="buy"]').forEach(b => b.addEventListener('click', loadWallet));
 
     // ===== подарочные карточки =====
-    const GIFT_ICON = { premium_month: '★', premium_year: '★', premium_forever: '👑', balance30: '💰', custom_prefix: '🏷️',
-      coupon11: '🎟️', coupon25: '🎟️', coupon40: '🎟️', none: '🫥' };
+    const GIFT_KIND = { premium_month: 'Премиум', premium_year: 'Премиум', premium_forever: 'Премиум', balance30: 'Баланс', custom_prefix: 'Префикс',
+      coupon11: 'Скидка', coupon25: 'Скидка', coupon40: 'Скидка', none: 'Пусто' };
     const RARE = ['premium_year', 'premium_forever', 'coupon40', 'custom_prefix'];
     const left = ms => { const h = Math.max(0, Math.floor(ms / 3600000)); return h >= 24 ? Math.floor(h / 24) + ' д ' + (h % 24) + ' ч' : h + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин'; };
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1820,7 +1826,7 @@
       const box = q('[data-gifts]'), top = q('[data-gifts-top]'), gnote = q('[data-gifts-note]'), a = saved();
       if (!a) {
         top.innerHTML = '';
-        box.innerHTML = [0, 1, 2].map(() => '<button class="gcard" data-gift-login><div class="in"><div class="face front"><div class="ico">🎁</div><div class="t">Подарок</div><div class="s">Войди, чтобы открыть</div></div></div></button>').join('');
+        box.innerHTML = [0].map(() => '<button class="gcard" data-gift-login><div class="in"><div class="face front"><div class="box"></div><div class="t">Подарок</div><div class="s">Войди, чтобы открыть</div></div></div></button>').join('');
         box.querySelectorAll('[data-gift-login]').forEach(b => b.onclick = () => openAuth('login', b));
         gnote.textContent = '';
         return;
@@ -1829,18 +1835,18 @@
         const [r, w] = await Promise.all([call('GET', '/cards', null, a.token), call('GET', '/wallet', null, a.token)]);
         top.innerHTML = '<span class="chip">Баланс: <b>' + w.balance + ' ₽</b></span>'
           + (w.coupons.length ? '<span class="chip">Скидки: <b>' + w.coupons.map(c => '−' + c.percent + '%').join(', ') + '</b></span>' : '')
-          + (w.customPrefix ? '<span class="chip">🏷️ <b>Свой префикс</b> — в моде, Косметика → Custom Prefix</span>' : '')
-          + '<span class="chip">Новые карточки через <b>' + left(r.nextAt - r.now) + '</b></span>';
+          + (w.customPrefix ? '<span class="chip"><b>Свой префикс</b> — в моде, Косметика → Custom Prefix</span>' : '')
+          + '<span class="chip">Новая карточка через <b>' + left(r.nextAt - r.now) + '</b></span>';
         box.innerHTML = r.cards.map(c => {
           const exp = 'Истекает через ' + left(c.expires - r.now);
           const cls = 'gcard' + (c.opened ? ' open' : '') + (RARE.includes(c.reward) ? ' rare' : '') + (c.reward === 'none' ? ' empty' : '');
           return '<button class="' + cls + '" data-card="' + c.id + '"' + (c.opened ? ' disabled' : '') + '><div class="in">'
-            + '<div class="face front"><div class="ico">🎁</div><div class="t">Подарочная карточка</div><div class="s">' + exp + '</div><div class="s">Нажми, чтобы открыть</div></div>'
-            + '<div class="face back"><div class="ico">' + (GIFT_ICON[c.reward] || '🎁') + '</div><div class="t">' + esc(c.title || '') + '</div><div class="s">' + (c.opened ? exp.replace('Истекает', 'Исчезнет') : '') + '</div></div>'
+            + '<div class="face front"><div class="box"></div><div class="t">Подарочная карточка</div><div class="s">' + exp + '</div><div class="s">Нажми, чтобы открыть</div></div>'
+            + '<div class="face back"><div class="kind">' + (GIFT_KIND[c.reward] || 'Подарок') + '</div><div class="t">' + esc(c.title || '') + '</div><div class="s">' + (c.opened ? exp.replace('Истекает', 'Исчезнет') : '') + '</div></div>'
             + '</div></button>';
         }).join('');
         box.querySelectorAll('[data-card]:not([disabled])').forEach(b => b.onclick = () => openCard(b));
-        gnote.textContent = r.cards.some(c => !c.opened) ? '' : 'Все карточки открыты — новые завтра';
+        gnote.textContent = r.cards.some(c => !c.opened) ? '' : 'Карточка открыта — новая завтра';
       } catch (e) {
         if (e.message.startsWith('Вход устарел') || e.message.startsWith('Нужно войти')) { save(null); showAccount(); return loadGifts(); }
         gnote.textContent = e.message;
@@ -1916,7 +1922,7 @@
       b.disabled = true;
       try {
         const r = await call('POST', '/cards/' + b.dataset.card + '/open', null, a.token);
-        b.querySelector('.back .ico').textContent = GIFT_ICON[r.reward] || '🎁';
+        b.querySelector('.back .kind').textContent = GIFT_KIND[r.reward] || 'Подарок';
         b.querySelector('.back .t').textContent = r.title;
         if (RARE.includes(r.reward)) b.classList.add('rare');
         if (r.reward === 'none') b.classList.add('empty');
