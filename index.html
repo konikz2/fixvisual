@@ -285,6 +285,60 @@
   .price li::before { content: "—"; color: #52525b; margin-right: 10px; }
   .price.hot li::before { color: #a1a1aa; }
 
+  /* ===== подарочные карточки ===== */
+  .gifts-top { margin: 34px auto 0; max-width: 860px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .gifts-top .chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--solid); font-size: 14px; color: #cfcdd8; }
+  .gifts-top .chip b { color: var(--text); }
+  .gcards { margin: 26px auto 0; max-width: 860px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .gcards { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .gcards { grid-template-columns: 1fr; } }
+  .gcard { perspective: 900px; height: 210px; cursor: pointer; border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: center; }
+  .gcard:disabled { cursor: default; }
+  .gcard .in { position: relative; width: 100%; height: 100%; transition: transform .8s var(--ease, ease); transform-style: preserve-3d; }
+  .gcard.open .in { transform: rotateY(180deg); }
+  .gcard .face { position: absolute; inset: 0; border-radius: 20px; border: 1px solid var(--line); backface-visibility: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px; }
+  .gcard .front { background: radial-gradient(120% 90% at 0% 0%, rgba(255,255,255,.12), transparent 55%), linear-gradient(160deg, #1b1a22, #0d0c12); }
+  .gcard:not(:disabled):hover .front { border-color: rgba(255,255,255,.35); box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 18px 50px rgba(0,0,0,.45); }
+  .gcard .front .ico { font-size: 44px; filter: drop-shadow(0 0 18px rgba(255,255,255,.25)); }
+  .gcard .front .t { font-weight: 600; }
+  .gcard .front .s, .gcard .back .s { font-size: 13px; color: var(--muted); }
+  .gcard .back { transform: rotateY(180deg); background: radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.14), transparent 60%), #121118; }
+  .gcard .back .ico { font-size: 38px; }
+  .gcard .back .t { font-size: 20px; font-weight: 600; }
+  .gcard.rare .back { border-color: rgba(250,204,21,.6); box-shadow: 0 0 40px rgba(250,204,21,.18) inset; }
+  .gcard.empty .back { opacity: .7; }
+  .gifts-note { margin: 18px auto 0; max-width: 640px; text-align: center; color: var(--muted); font-size: 14px; min-height: 20px; }
+  .gifts-odds { margin: 22px auto 0; max-width: 860px; color: var(--muted); font-size: 13px; text-align: center; line-height: 1.7; }
+  .buy-extra { display: grid; gap: 10px; margin: 14px 0; }
+  .buy-extra select, .buy-extra input[type=text] { width: 100%; }
+  .buy-total { font-weight: 600; margin: 8px 0 2px; }
+
+  /* ===== чат предложений ===== */
+  .ideas { margin: 34px auto 0; max-width: 760px; border: 1px solid var(--line); border-radius: 22px; background: var(--solid); overflow: hidden; }
+  .ideas-log { height: 420px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+  .idea { display: grid; gap: 4px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.035); border: 1px solid transparent; }
+  .idea.mine { border-color: rgba(255,255,255,.12); }
+  .idea .h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .idea .h b { color: var(--text); font-weight: 600; }
+  .idea .tag { padding: 2px 8px; border-radius: 999px; font-size: 12px; background: rgba(255,255,255,.07); color: #cfcdd8; }
+  .idea .tag.bug { background: rgba(248,113,113,.14); color: #fca5a5; }
+  .idea .tag.ok { background: rgba(74,222,128,.14); color: #86efac; }
+  .idea .tag.no { background: rgba(255,255,255,.05); color: #8f8f99; }
+  .idea .x { white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+  .idea .adm { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .idea .adm button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: none; color: #cfcdd8; cursor: pointer; }
+  .idea .adm button:hover { border-color: rgba(255,255,255,.35); }
+  .ideas-empty { margin: auto; color: var(--muted); font-size: 14px; text-align: center; }
+  .ideas-form { border-top: 1px solid var(--line); padding: 14px; display: grid; gap: 10px; }
+  .ideas-form .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .ideas-kind { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .ideas-kind button { font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+  .ideas-kind button.on { background: rgba(255,255,255,.1); color: var(--text); }
+  .ideas-form textarea { width: 100%; min-height: 70px; resize: vertical; font: inherit; color: inherit; background: rgba(255,255,255,.04);
+    border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .ideas-form .note { font-size: 13px; color: var(--muted); flex: 1; min-width: 160px; }
+
   /* надпись внизу с мягким свечением */
   .outro { padding: 140px 0 120px; text-align: center; }
   .outro h2 { font-size: clamp(44px, 8vw, 110px); line-height: .95; color: #e4e4e7;
@@ -427,6 +481,8 @@
       <a href="#features">Функции</a>
       <a href="#news">Новое</a>
       <a href="#download">Скачать</a>
+      <a href="#gifts">Подарки</a>
+      <a href="#ideas">Идеи</a>
       <a href="#prices">Цены</a>
     </nav>
     <div class="right">
@@ -665,6 +721,41 @@
     </div>
   </section>
 
+  <section id="gifts">
+    <div class="wrap">
+      <div class="center rv">
+        <div class="kicker">Подарки</div>
+        <h2 class="serif title">Три карточки каждый день</h2>
+        <p class="lead">Заходи раз в день и открывай карточки: Премиум, деньги на баланс, свой префикс или скидка. Карточка живёт 3 дня.</p>
+      </div>
+      <div class="gifts-top" data-gifts-top></div>
+      <div class="gcards" data-gifts></div>
+      <p class="gifts-note" data-gifts-note></p>
+      <p class="gifts-odds">В карточке: Премиум на месяц — 11% · на год — 5% · навсегда — 1% · 30 ₽ на баланс — 35% · свой префикс — 7% ·
+        скидка 11% — 20% · скидка 25% — 8% · скидка 40% — 2% · пусто — 11%.<br>Баланс и скидки — на покупку Премиума, скидка действует 30 дней. Свой префикс — функция «Custom Prefix» в моде: надпись и цвета на выбор.</p>
+    </div>
+  </section>
+
+  <section id="ideas">
+    <div class="wrap">
+      <div class="center rv">
+        <div class="kicker">Предложения</div>
+        <h2 class="serif title">Идеи и баги — прямо сюда</h2>
+        <p class="lead">Общий чат с разработчиком: предлагай функции и пиши о багах. Сообщение — раз в минуту. За подтверждённый баг — скидка 15% на Премиум.</p>
+      </div>
+      <div class="ideas">
+        <div class="ideas-log" data-ideas-log><div class="ideas-empty">Загрузка…</div></div>
+        <form class="ideas-form" data-ideas-form>
+          <div class="row">
+            <div class="ideas-kind" data-ideas-kind><button type="button" class="on" data-k="idea">💡 Предложение</button><button type="button" data-k="bug">🐞 Баг</button></div>
+          </div>
+          <textarea name="text" maxlength="600" placeholder="Что добавить или что сломалось? Для бага: что делал, что ожидал и что случилось."></textarea>
+          <div class="row"><span class="note" data-ideas-note></span><button class="btn white" type="submit">Отправить</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <section id="prices">
     <div class="wrap">
       <div class="center rv">
@@ -745,6 +836,12 @@
       <label class="opt"><input type="radio" name="plan" value="month" checked> Месяц<span>99 ₽</span></label>
       <label class="opt"><input type="radio" name="plan" value="year"> Год<span>329 ₽</span></label>
       <label class="opt"><input type="radio" name="plan" value="forever"> Навсегда<span>449 ₽</span></label>
+      <div class="buy-extra">
+        <label>Промокод<input type="text" name="promo" autocomplete="off" spellcheck="false" maxlength="24" placeholder="Например, FixVisual"></label>
+        <label data-coupon-row hidden>Скидка из подарка<select name="coupon"></select></label>
+        <label class="agree" data-balance-row hidden><input type="checkbox" name="balance"> <span data-balance-text>Списать с баланса</span></label>
+      </div>
+      <p class="buy-total" data-buy-total></p>
       <p class="final">Цена окончательная: без комиссий и без автопродления. 14 дней — возврат всей суммы.</p>
       <label class="agree"><input type="checkbox" name="terms" required> <span>Принимаю <a href="terms.html#refund" target="_blank">условия покупки и возврата</a></span></label>
       <button class="btn gold">Оплатить по СБП</button>
@@ -1439,6 +1536,7 @@
     const q = s => document.querySelector(s);
     const note = (form, t) => { form.querySelector('.note').textContent = t; };
     class Fail extends Error {}
+    let ideasAdmin = false; // админ видит кнопки «баг подтверждён» в чате предложений
 
     async function call(method, path, body, token) {
       let r;
@@ -1473,11 +1571,11 @@
         if (me && me.admin) tags += ' · Админ';
         if (me && me.sponsor) tags += ' · Спонсор';
         right.innerHTML = '<span class="btn" style="cursor:default">' + a.nick.replace(/</g, '&lt;') + tags + '</span><button class="btn" data-acc="del">Удалить мои данные</button><button class="btn" data-acc="out">Выйти</button>';
-        right.querySelector('[data-acc="out"]').onclick = () => { call('POST', '/logout', null, a.token).catch(() => {}); save(null); showAccount(); };
+        right.querySelector('[data-acc="out"]').onclick = () => { call('POST', '/logout', null, a.token).catch(() => {}); save(null); showAccount(); loadGifts(); };
         right.querySelector('[data-acc="del"]').onclick = e => openDelete(e.currentTarget);
       };
       draw(null);
-      try { draw(await call('GET', '/me', null, a.token)); }
+      try { const m = await call('GET', '/me', null, a.token); ideasAdmin = !!m.admin; draw(m); }
       catch (e) { if (e.message.startsWith('Вход устарел') || e.message.startsWith('Нужно войти')) { save(null); showAccount(); } }
     }
 
@@ -1600,7 +1698,16 @@
       const btn = bf.querySelector('button.gold');
       btn.disabled = true; note(bf, 'Создаю оплату…');
       try {
-        const r = await call('POST', '/pay', { plan: bf.plan.value }, a.token);
+        const r = await call('POST', '/pay', buyBody(), a.token);
+        if (r.paid) {
+          // всё покрыл баланс — Премиум уже выдан, банк не нужен
+          note(bf, '★ Оплачено с баланса! Премиум ' + PLAN_NAME[bf.plan.value]
+            + (r.premiumUntil ? ' — до ' + new Date(r.premiumUntil).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '')
+            + '. Зайди в лаунчер под этим аккаунтом и запусти игру.');
+          btn.disabled = false;
+          showAccount(); loadWallet(); loadGifts();
+          return;
+        }
         note(bf, 'Открываю оплату…');
         location.href = r.url;
       } catch (err) {
@@ -1634,7 +1741,168 @@
       } catch (err) { note(bf, err.message); }
     }
 
+    // ===== скидки и баланс в окне покупки =====
+    let wallet = null;
+    function buyBody() {
+      return { plan: bf.plan.value, promo: bf.promo.value.trim(), coupon: bf.coupon.value || '', use_balance: !!bf.balance.checked };
+    }
+    async function loadWallet() {
+      const a = saved();
+      wallet = null;
+      if (!a) { q('[data-coupon-row]').hidden = q('[data-balance-row]').hidden = true; return quote(); }
+      try { wallet = await call('GET', '/wallet', null, a.token); } catch (e) { return; }
+      const sel = bf.coupon;
+      sel.innerHTML = '<option value="">Без скидки из подарка</option>' + wallet.coupons.map(c =>
+        '<option value="' + c.id + '">−' + c.percent + '% · до ' + new Date(c.expires).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + '</option>').join('');
+      if (wallet.coupons.length) sel.value = wallet.coupons[0].id;
+      q('[data-coupon-row]').hidden = !wallet.coupons.length;
+      q('[data-balance-row]').hidden = !wallet.balance;
+      q('[data-balance-text]').textContent = 'Списать с баланса (' + wallet.balance + ' ₽)';
+      quote();
+    }
+    let quoteSeq = 0;
+    async function quote() {
+      const out = q('[data-buy-total]'), a = saved(), my = ++quoteSeq;
+      if (!a) { out.textContent = ''; return; }
+      try {
+        const r = await call('POST', '/pay/quote', buyBody(), a.token);
+        if (my !== quoteSeq) return;
+        let t = 'К оплате: ' + r.toPay + ' ₽';
+        if (r.percent) t += ' (скидка ' + r.percent + '%' + (r.promo ? ' по промокоду' : '') + ')';
+        if (r.balanceUsed) t += ' · с баланса ' + r.balanceUsed + ' ₽';
+        out.textContent = t;
+        bf.querySelector('button.gold').textContent = r.toPay < 1 ? 'Оплатить с баланса' : 'Оплатить по СБП';
+      } catch (e) { if (my === quoteSeq) out.textContent = e.message; }
+    }
+    bf.addEventListener('change', quote);
+    let promoTimer;
+    bf.promo.addEventListener('input', () => { clearTimeout(promoTimer); promoTimer = setTimeout(quote, 400); });
+    document.querySelectorAll('[data-open="buy"]').forEach(b => b.addEventListener('click', loadWallet));
+
+    // ===== подарочные карточки =====
+    const GIFT_ICON = { premium_month: '★', premium_year: '★', premium_forever: '👑', balance30: '💰', custom_prefix: '🏷️',
+      coupon11: '🎟️', coupon25: '🎟️', coupon40: '🎟️', none: '🫥' };
+    const RARE = ['premium_year', 'premium_forever', 'coupon40', 'custom_prefix'];
+    const left = ms => { const h = Math.max(0, Math.floor(ms / 3600000)); return h >= 24 ? Math.floor(h / 24) + ' д ' + (h % 24) + ' ч' : h + ' ч ' + Math.floor(ms % 3600000 / 60000) + ' мин'; };
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    async function loadGifts() {
+      const box = q('[data-gifts]'), top = q('[data-gifts-top]'), gnote = q('[data-gifts-note]'), a = saved();
+      if (!a) {
+        top.innerHTML = '';
+        box.innerHTML = [0, 1, 2].map(() => '<button class="gcard" data-gift-login><div class="in"><div class="face front"><div class="ico">🎁</div><div class="t">Подарок</div><div class="s">Войди, чтобы открыть</div></div></div></button>').join('');
+        box.querySelectorAll('[data-gift-login]').forEach(b => b.onclick = () => openAuth('login', b));
+        gnote.textContent = '';
+        return;
+      }
+      try {
+        const [r, w] = await Promise.all([call('GET', '/cards', null, a.token), call('GET', '/wallet', null, a.token)]);
+        top.innerHTML = '<span class="chip">Баланс: <b>' + w.balance + ' ₽</b></span>'
+          + (w.coupons.length ? '<span class="chip">Скидки: <b>' + w.coupons.map(c => '−' + c.percent + '%').join(', ') + '</b></span>' : '')
+          + (w.customPrefix ? '<span class="chip">🏷️ <b>Свой префикс</b> — в моде, Косметика → Custom Prefix</span>' : '')
+          + '<span class="chip">Новые карточки через <b>' + left(r.nextAt - r.now) + '</b></span>';
+        box.innerHTML = r.cards.map(c => {
+          const exp = 'Истекает через ' + left(c.expires - r.now);
+          const cls = 'gcard' + (c.opened ? ' open' : '') + (RARE.includes(c.reward) ? ' rare' : '') + (c.reward === 'none' ? ' empty' : '');
+          return '<button class="' + cls + '" data-card="' + c.id + '"' + (c.opened ? ' disabled' : '') + '><div class="in">'
+            + '<div class="face front"><div class="ico">🎁</div><div class="t">Подарочная карточка</div><div class="s">' + exp + '</div><div class="s">Нажми, чтобы открыть</div></div>'
+            + '<div class="face back"><div class="ico">' + (GIFT_ICON[c.reward] || '🎁') + '</div><div class="t">' + esc(c.title || '') + '</div><div class="s">' + (c.opened ? exp.replace('Истекает', 'Исчезнет') : '') + '</div></div>'
+            + '</div></button>';
+        }).join('');
+        box.querySelectorAll('[data-card]:not([disabled])').forEach(b => b.onclick = () => openCard(b));
+        gnote.textContent = r.cards.some(c => !c.opened) ? '' : 'Все карточки открыты — новые завтра';
+      } catch (e) {
+        if (e.message.startsWith('Вход устарел') || e.message.startsWith('Нужно войти')) { save(null); showAccount(); return loadGifts(); }
+        gnote.textContent = e.message;
+      }
+    }
+    // ---- чат предложений ----
+    const IDEA_STATUS = { bug_ok: ['ok', 'Баг подтверждён · −15%'], done: ['ok', 'Сделано'], rejected: ['no', 'Не будет'] };
+    let ideaKind = 'idea', ideasSeen = '';
+    const ideaTime = t => new Date(t).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    async function loadIdeas(scroll) {
+      const log = q('[data-ideas-log]'), a = saved();
+      let r;
+      try { r = await call('GET', '/ideas'); } catch (e) { if (!ideasSeen) log.innerHTML = '<div class="ideas-empty">' + esc(e.message) + '</div>'; return; }
+      const me = a ? a.nick.toLowerCase() : '';
+      const key = JSON.stringify(r.ideas) + ideasAdmin;
+      if (key === ideasSeen) return;
+      ideasSeen = key;
+      const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 60;
+      log.innerHTML = r.ideas.length ? r.ideas.map(i => {
+        const st = IDEA_STATUS[i.status];
+        return '<div class="idea' + (i.nick.toLowerCase() === me ? ' mine' : '') + '"><div class="h"><b>' + esc(i.nick) + '</b>'
+          + '<span class="tag' + (i.kind === 'bug' ? ' bug' : '') + '">' + (i.kind === 'bug' ? '🐞 Баг' : '💡 Идея') + '</span>'
+          + (st ? '<span class="tag ' + st[0] + '">' + st[1] + '</span>' : '') + '<span>' + ideaTime(i.created) + '</span></div>'
+          + '<div class="x">' + esc(i.text) + '</div>'
+          + (ideasAdmin ? '<div class="adm">' + (i.kind === 'bug' ? '<button data-st="bug_ok">Баг подтверждён (−15%)</button>' : '')
+            + '<button data-st="done">Сделано</button><button data-st="rejected">Не будет</button><button data-st="new">Сбросить</button><button data-del>Удалить</button></div>' : '')
+          + '</div>';
+      }).join('') : '<div class="ideas-empty">Пока пусто — напиши первое предложение</div>';
+      log.querySelectorAll('.idea').forEach((el, n) => {
+        const id = r.ideas[n].id;
+        el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => ideaAdmin('POST', id, { status: b.dataset.st }));
+        const d = el.querySelector('[data-del]');
+        if (d) d.onclick = () => confirm('Удалить сообщение?') && ideaAdmin('DELETE', id);
+      });
+      if (scroll || atBottom) log.scrollTop = log.scrollHeight;
+    }
+    async function ideaAdmin(method, id, body) {
+      const a = saved();
+      try { await call(method, '/admin/ideas/' + id, body, a && a.token); ideasSeen = ''; loadIdeas(); }
+      catch (e) { q('[data-ideas-note]').textContent = e.message; }
+    }
+    q('[data-ideas-kind]').querySelectorAll('button').forEach(b => b.onclick = () => {
+      ideaKind = b.dataset.k;
+      q('[data-ideas-kind]').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      q('[data-ideas-form] textarea').placeholder = ideaKind === 'bug'
+        ? 'Что делал, что ожидал и что случилось? Версия мода и сервер — если знаешь.' : 'Что добавить или улучшить?';
+    });
+    q('[data-ideas-form]').onsubmit = async e => {
+      e.preventDefault();
+      const f = e.target, n = q('[data-ideas-note]'), a = saved();
+      if (!a) { openAuth('login', f.querySelector('button[type=submit]')); return; }
+      const text = f.text.value.trim();
+      if (text.length < 5) { n.textContent = 'Слишком коротко — опиши подробнее'; return; }
+      const btn = f.querySelector('button[type=submit]');
+      btn.disabled = true;
+      try {
+        await call('POST', '/ideas', { kind: ideaKind, text }, a.token);
+        f.text.value = '';
+        n.textContent = ideaKind === 'bug' ? 'Спасибо! Если баг подтвердится — скидка 15% появится в подарках.' : 'Спасибо за идею!';
+        ideasSeen = '';
+        loadIdeas(true);
+      } catch (err) {
+        if (err.message.startsWith('Вход устарел') || err.message.startsWith('Нужно войти')) { save(null); showAccount(); }
+        n.textContent = err.message;
+      } finally { btn.disabled = false; }
+    };
+    loadIdeas(true);
+    setInterval(() => { if (!document.hidden) loadIdeas(); }, 15000);
+
+    async function openCard(b) {
+      const a = saved();
+      if (!a || b.disabled) return;
+      b.disabled = true;
+      try {
+        const r = await call('POST', '/cards/' + b.dataset.card + '/open', null, a.token);
+        b.querySelector('.back .ico').textContent = GIFT_ICON[r.reward] || '🎁';
+        b.querySelector('.back .t').textContent = r.title;
+        if (RARE.includes(r.reward)) b.classList.add('rare');
+        if (r.reward === 'none') b.classList.add('empty');
+        b.classList.add('open');
+        q('[data-gifts-note]').textContent = r.note || (r.reward === 'none' ? 'В этот раз пусто — завтра новые карточки' : 'Выпало: ' + r.title + '!');
+        setTimeout(() => { loadGifts(); showAccount(); }, 1400);
+      } catch (e) {
+        b.disabled = false;
+        q('[data-gifts-note]').textContent = e.message;
+      }
+    }
+
     showAccount();
+    loadGifts();
+    // вход/выход меняют и карточки
+    window.addEventListener('storage', loadGifts);
+    q('[data-form="login"]').addEventListener('submit', () => setTimeout(loadGifts, 900));
     const paid = location.hash.match(/^#paid=([0-9a-f]{24})$/);
     if (paid) checkPaid(paid[1], 8);
     // из лаунчера: …/fixvisual/#register — сразу окно регистрации, #login — входа
