@@ -380,6 +380,10 @@
   .tg-code { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .tg-code code { flex: 1 1 200px; min-width: 0; font: 600 clamp(14px, 4.4vw, 20px) "JetBrains Mono", monospace; letter-spacing: .06em; text-align: center; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.04); user-select: all; }
   .tg-hint { color: var(--muted); font-size: 13px; margin-top: 14px; min-height: 18px; }
+  .tg-qr { display: flex; gap: 14px; align-items: center; }
+  .tg-qr .q { flex: none; width: 132px; height: 132px; border-radius: 14px; background: #fff; padding: 8px; display: grid; place-items: center; color: #555; font-size: 12px; }
+  .tg-qr .q svg { width: 100%; height: 100%; display: block; }
+  .tg-qr p { color: var(--muted); font-size: 14px; line-height: 1.5; }
   @keyframes fade { from { opacity: 0; } }
   .box { width: 100%; max-width: 420px; padding: 30px; border-radius: 22px; background: #0c0b10; border: 1px solid var(--line-2); position: relative; }
   .box h3 { font-size: 34px; line-height: 1; }
@@ -838,8 +842,9 @@
     <h3 class="serif" id="tglink-title">Привязать Telegram</h3>
     <p class="sub">Карточка дня, Премиум и весточки — прямо в Telegram</p>
     <div class="tg-steps">
-      <div><div class="n">1 · Открой бота</div><div class="row"><a class="btn white" data-tg-app target="_blank" rel="noopener">В приложении</a><a class="btn" data-tg-web target="_blank" rel="noopener">Telegram Web</a></div></div>
-      <div><div class="n">2 · Отправь ему код</div><div class="tg-code"><code data-tg-code>…</code><button class="btn" data-tg-copy>Скопировать</button></div></div>
+      <div><div class="n">С телефона — проще всего</div><div class="tg-qr"><div class="q" data-tg-qr>…</div><p>Наведи камеру телефона на код — откроется бот в Telegram, нажми «Старт». Готово.</p></div></div>
+      <div><div class="n">Или на этом компьютере</div><div class="row"><a class="btn white" data-tg-app target="_blank" rel="noopener">Приложение Telegram</a><a class="btn" data-tg-web target="_blank" rel="noopener">Telegram Web</a></div></div>
+      <div><div class="n">Не открывается — найди в Telegram @FixVisualBot и отправь ему код</div><div class="tg-code"><code data-tg-code>…</code><button class="btn" data-tg-copy>Скопировать</button></div></div>
     </div>
     <p class="tg-hint" data-tg-hint>Код живёт 10 минут. Бот ответит, что Telegram привязан.</p>
   </div>
@@ -1646,6 +1651,7 @@
               try { await navigator.clipboard.writeText(r.code); q('[data-tg-copy]').textContent = 'Скопировано'; } catch (e) { q('[data-tg-copy]').textContent = 'Выдели и скопируй'; }
             };
             q('[data-tg-copy]').textContent = 'Скопировать';
+            drawTgQr(r.url);
             window.fvOpen('tglink', menuBtn);
           } catch (e) { tgBtn.textContent = e.message; }
         };
@@ -1891,6 +1897,19 @@
         gnote.textContent = e.message;
       }
     }
+    // QR-код привязки: телефон откроет бота с кодом (библиотеку грузим только когда окно открыли)
+    function drawTgQr(url) {
+      const box = q('[data-tg-qr]');
+      const draw = () => { const qr = qrcode(0, 'M'); qr.addData(url); qr.make(); box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); };
+      if (window.qrcode) return draw();
+      box.textContent = '…';
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+      s.onload = draw;
+      s.onerror = () => { box.textContent = 'QR не загрузился'; };
+      document.head.appendChild(s);
+    }
+
     // ---- чат предложений ----
     const IDEA_STATUS = { bug_ok: ['ok', 'Баг подтверждён · −15%'], done: ['ok', 'Сделано'], rejected: ['no', 'Не будет'] };
     let ideaKind = 'idea', ideasSeen = '';
