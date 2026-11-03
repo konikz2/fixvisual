@@ -374,6 +374,12 @@
 
   .modal { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.75); backdrop-filter: blur(6px); }
   .modal.open { display: flex; animation: fade .2s; }
+  .tg-steps { display: grid; gap: 14px; margin-top: 22px; }
+  .tg-steps .n { font: 500 11px "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .tg-steps .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tg-code { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tg-code code { flex: 1 1 200px; min-width: 0; font: 600 clamp(14px, 4.4vw, 20px) "JetBrains Mono", monospace; letter-spacing: .06em; text-align: center; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.04); user-select: all; }
+  .tg-hint { color: var(--muted); font-size: 13px; margin-top: 14px; min-height: 18px; }
   @keyframes fade { from { opacity: 0; } }
   .box { width: 100%; max-width: 420px; padding: 30px; border-radius: 22px; background: #0c0b10; border: 1px solid var(--line-2); position: relative; }
   .box h3 { font-size: 34px; line-height: 1; }
@@ -825,6 +831,19 @@
     <small class="seller">Связь: <a href="https://github.com/konikz2/fixvisual/issues">github.com/konikz2/fixvisual/issues</a> · Реквизиты продавца — в <a href="terms.html#seller">соглашении</a></small>
   </div>
 </footer>
+
+<div class="modal" id="tglink" role="dialog" aria-modal="true" aria-labelledby="tglink-title">
+  <div class="box">
+    <button class="x" data-close aria-label="Закрыть">×</button>
+    <h3 class="serif" id="tglink-title">Привязать Telegram</h3>
+    <p class="sub">Карточка дня, Премиум и весточки — прямо в Telegram</p>
+    <div class="tg-steps">
+      <div><div class="n">1 · Открой бота</div><div class="row"><a class="btn white" data-tg-app target="_blank" rel="noopener">В приложении</a><a class="btn" data-tg-web target="_blank" rel="noopener">Telegram Web</a></div></div>
+      <div><div class="n">2 · Отправь ему код</div><div class="tg-code"><code data-tg-code>…</code><button class="btn" data-tg-copy>Скопировать</button></div></div>
+    </div>
+    <p class="tg-hint" data-tg-hint>Код живёт 10 минут. Бот ответит, что Telegram привязан.</p>
+  </div>
+</div>
 
 <div class="modal" id="auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
   <div class="box">
@@ -1615,9 +1634,20 @@
         const tgBtn = right.querySelector('[data-acc="tg"]');
         call('GET', '/tg/status', null, a.token).then(s => { if (s.linked) tgBtn.textContent = 'Telegram привязан ✓'; else if (!s.bot) tgBtn.remove(); }).catch(() => tgBtn.remove());
         tgBtn.onclick = async () => {
-          const w = window.open('', '_blank');
-          try { const r = await call('POST', '/tg/link', null, a.token); if (w) w.location = r.url; else location.href = r.url; }
-          catch (e) { if (w) w.close(); tgBtn.textContent = e.message; }
+          toggle(false);
+          try {
+            const r = await call('POST', '/tg/link', null, a.token);
+            // в браузере «Старт» с кодом часто не срабатывает — код можно просто отправить боту сообщением
+            q('[data-tg-app]').href = r.app || r.url;
+            q('[data-tg-web]').href = r.web || ('https://web.telegram.org/k/#@' + r.bot);
+            q('[data-tg-code]').textContent = r.code || '';
+            q('[data-tg-hint]').textContent = 'Код живёт 10 минут. Бот @' + r.bot + ' ответит, что Telegram привязан.';
+            q('[data-tg-copy]').onclick = async () => {
+              try { await navigator.clipboard.writeText(r.code); q('[data-tg-copy]').textContent = 'Скопировано'; } catch (e) { q('[data-tg-copy]').textContent = 'Выдели и скопируй'; }
+            };
+            q('[data-tg-copy]').textContent = 'Скопировать';
+            window.fvOpen('tglink', menuBtn);
+          } catch (e) { tgBtn.textContent = e.message; }
         };
       };
       draw(null);
