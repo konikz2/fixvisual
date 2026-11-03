@@ -1602,6 +1602,7 @@
         // одна кнопка с ником — роли и действия в выпадающем меню, чтобы шапка не наезжала на ссылки
         right.innerHTML = '<button class="btn" data-acc="menu" aria-haspopup="true" aria-expanded="false">' + nick + ' ▾</button>'
           + '<div class="acc-menu" hidden><div class="who"><b>' + nick + '</b>' + (roles.length ? roles.join(' · ') : 'Аккаунт FixVisual') + '</div>'
+          + '<button data-acc="tg">Привязать Telegram</button>'
           + '<button data-acc="del" class="danger">Удалить мои данные</button><button data-acc="out">Выйти</button></div>';
         const menuBtn = right.querySelector('[data-acc="menu"]'), menu = right.querySelector('.acc-menu');
         const toggle = open => { menu.hidden = !open; menuBtn.setAttribute('aria-expanded', open); };
@@ -1610,6 +1611,14 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape') toggle(false); });
         right.querySelector('[data-acc="out"]').onclick = () => { call('POST', '/logout', null, a.token).catch(() => {}); save(null); showAccount(); loadGifts(); };
         right.querySelector('[data-acc="del"]').onclick = () => { toggle(false); openDelete(menuBtn); };
+        // Telegram: одноразовая ссылка на бота с кодом привязки (живёт 10 минут)
+        const tgBtn = right.querySelector('[data-acc="tg"]');
+        call('GET', '/tg/status', null, a.token).then(s => { if (s.linked) tgBtn.textContent = 'Telegram привязан ✓'; else if (!s.bot) tgBtn.remove(); }).catch(() => tgBtn.remove());
+        tgBtn.onclick = async () => {
+          const w = window.open('', '_blank');
+          try { const r = await call('POST', '/tg/link', null, a.token); if (w) w.location = r.url; else location.href = r.url; }
+          catch (e) { if (w) w.close(); tgBtn.textContent = e.message; }
+        };
       };
       draw(null);
       try { const m = await call('GET', '/me', null, a.token); ideasAdmin = !!m.admin; draw(m); }
