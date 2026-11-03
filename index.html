@@ -92,10 +92,21 @@
   .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
   .logo i { width: 10px; height: 10px; background: #e4e4e7; transform: rotate(45deg); }
   /* ссылки — ровно по центру страницы, независимо от ширины логотипа и кнопок */
-  .nav nav { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 28px; }
+  /* меню между логотипом и аккаунтом: не залезает под кнопки, на средней ширине сжимается */
+  .nav nav { display: flex; gap: 28px; margin: 0 auto; padding: 0 20px; min-width: 0; }
+  @media (max-width: 1180px) { .nav nav { gap: 18px; } .nav nav a { font-size: 13px; letter-spacing: .04em; } }
+  @media (max-width: 960px) { .nav nav { display: none; } }
   .nav nav a { color: var(--muted); font: 500 14px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; transition: color .2s; }
   .nav nav a:hover { color: var(--text); }
-  .nav .right { display: flex; gap: 8px; }
+  .nav .right { display: flex; gap: 8px; flex-shrink: 0; position: relative; }
+  .acc-menu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 230px; padding: 8px; border-radius: 16px; border: 1px solid var(--line);
+    background: #0f0e14; box-shadow: 0 20px 60px rgba(0,0,0,.55); display: grid; gap: 4px; z-index: 60; }
+  .acc-menu[hidden] { display: none; }
+  .acc-menu .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; font-size: 13px; color: var(--muted); }
+  .acc-menu .who b { display: block; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+  .acc-menu button { font: inherit; font-size: 14px; text-align: left; padding: 9px 10px; border-radius: 10px; border: 0; background: none; color: #cfcdd8; cursor: pointer; }
+  .acc-menu button:hover { background: rgba(255,255,255,.06); color: var(--text); }
+  .acc-menu button.danger:hover { color: #fca5a5; }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
     height: 38px; padding: 0 16px; border-radius: 3px; border: 1px solid #3f3f46;
@@ -1567,12 +1578,22 @@
         return;
       }
       const draw = me => {
-        let tags = '';
-        if (me && me.admin) tags += ' · Админ';
-        if (me && me.sponsor) tags += ' · Спонсор';
-        right.innerHTML = '<span class="btn" style="cursor:default">' + a.nick.replace(/</g, '&lt;') + tags + '</span><button class="btn" data-acc="del">Удалить мои данные</button><button class="btn" data-acc="out">Выйти</button>';
+        const roles = [];
+        if (me && me.admin) roles.push('Админ');
+        if (me && me.sponsor) roles.push('Спонсор');
+        if (me && me.premium) roles.push('Премиум');
+        const nick = a.nick.replace(/</g, '&lt;');
+        // одна кнопка с ником — роли и действия в выпадающем меню, чтобы шапка не наезжала на ссылки
+        right.innerHTML = '<button class="btn" data-acc="menu" aria-haspopup="true" aria-expanded="false">' + nick + ' ▾</button>'
+          + '<div class="acc-menu" hidden><div class="who"><b>' + nick + '</b>' + (roles.length ? roles.join(' · ') : 'Аккаунт FixVisual') + '</div>'
+          + '<button data-acc="del" class="danger">Удалить мои данные</button><button data-acc="out">Выйти</button></div>';
+        const menuBtn = right.querySelector('[data-acc="menu"]'), menu = right.querySelector('.acc-menu');
+        const toggle = open => { menu.hidden = !open; menuBtn.setAttribute('aria-expanded', open); };
+        menuBtn.onclick = e => { e.stopPropagation(); toggle(menu.hidden); };
+        document.addEventListener('click', e => { if (!right.contains(e.target)) toggle(false); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') toggle(false); });
         right.querySelector('[data-acc="out"]').onclick = () => { call('POST', '/logout', null, a.token).catch(() => {}); save(null); showAccount(); loadGifts(); };
-        right.querySelector('[data-acc="del"]').onclick = e => openDelete(e.currentTarget);
+        right.querySelector('[data-acc="del"]').onclick = () => { toggle(false); openDelete(menuBtn); };
       };
       draw(null);
       try { const m = await call('GET', '/me', null, a.token); ideasAdmin = !!m.admin; draw(m); }
