@@ -86,6 +86,17 @@
       <button class="gold">Выдать</button>
       <p class="note"></p>
     </form>
+    <div class="card" id="agrant" hidden>
+      <div class="who" style="margin-bottom:12px"><span><b>Администраторы</b> — админ открывает эту панель, выдаёт Премиум, получает тестовые версии. Выдавать права можешь только ты</span></div>
+      <table><thead><tr><th>Ник</th><th></th></tr></thead><tbody id="admins"></tbody></table>
+      <label style="margin-top:16px">Поиск аккаунта<input id="aq" type="search" placeholder="Ник или почта" autocomplete="off" maxlength="32"></label>
+      <div class="ulist" id="ausers" role="listbox" aria-label="Аккаунты"></div>
+      <div class="row" style="margin-top:14px">
+        <label>Аккаунт<input id="anick" readonly placeholder="Выбери в списке"></label>
+        <button class="gold" type="button" id="agive" style="align-self:end;margin-bottom:14px">Выдать админку</button>
+      </div>
+      <p class="note"></p>
+    </div>
     <div class="card" id="vgrant">
       <div class="who" style="margin-bottom:12px"><span><b>Выдача версии</b> — лаунчер этого аккаунта предложит обновиться до неё, даже если она тестовая</span></div>
       <label>Поиск аккаунта<input id="vq" type="search" placeholder="Ник или почта" autocomplete="off" maxlength="32"></label>
@@ -175,6 +186,7 @@
       $('#me').textContent = myNick;
       f.hidden = true; $('#panel').hidden = false;
       loadStats();
+      loadAdmins();
       loadVersions();
       loadUsers();
       loadList();
@@ -276,6 +288,71 @@
     } catch (err) { failRow(body, 4, err); }
   }
   $('#reloadPays').onclick = loadPays;
+
+  // ---------- администраторы (раздел виден только владельцу, право проверяет сервер) ----------
+  const abox = $('#agrant');
+  let atimer = null;
+
+  async function setAdmin(nick, on) {
+    try {
+      await req('POST', '/admin/admin', { nick, on });
+      note(abox, on ? 'Готово: «' + nick + '» теперь администратор' : 'Права у «' + nick + '» сняты', 'ok');
+      $('#anick').value = '';
+      loadAdmins();
+    } catch (err) { note(abox, err.message, 'bad'); }
+  }
+
+  async function loadAdmins() {
+    try {
+      const r = await req('GET', '/admin/admins');
+      abox.hidden = !r.owner;
+      if (!r.owner) return;
+      const body = $('#admins');
+      body.innerHTML = '';
+      for (const a of r.list) {
+        const tr = document.createElement('tr');
+        const n = document.createElement('td'); n.textContent = a.nick;
+        const act = document.createElement('td'); act.style.textAlign = 'right';
+        if (a.owner) { act.textContent = 'владелец'; act.className = 'until'; }
+        else {
+          const del = document.createElement('button');
+          del.className = 'ghost'; del.type = 'button'; del.textContent = 'Снять';
+          del.setAttribute('aria-label', 'Снять права с ' + a.nick);
+          del.onclick = () => { if (confirm('Снять права администратора с «' + a.nick + '»?')) setAdmin(a.nick, false); };
+          act.append(del);
+        }
+        tr.append(n, act); body.append(tr);
+      }
+      loadAdminUsers();
+    } catch (err) { abox.hidden = true; }
+  }
+
+  async function loadAdminUsers() {
+    const box = $('#ausers');
+    try {
+      const items = await req('GET', '/admin/users?q=' + encodeURIComponent($('#aq').value.trim()));
+      box.innerHTML = '';
+      if (!items.length) { box.innerHTML = '<div class="uempty">Никого не нашлось</div>'; return; }
+      for (const u of items) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'uitem' + (u.nick === $('#anick').value ? ' sel' : ''); b.setAttribute('role', 'option');
+        const n = document.createElement('span'); n.textContent = u.nick;
+        const s = document.createElement('small'); s.textContent = u.created ? 'с ' + fmt(u.created) : '';
+        b.append(n, s);
+        b.onclick = () => {
+          $('#anick').value = u.nick;
+          box.querySelectorAll('.uitem').forEach(x => x.classList.toggle('sel', x === b));
+        };
+        box.append(b);
+      }
+    } catch (err) { box.innerHTML = ''; const d = document.createElement('div'); d.className = 'uempty'; d.textContent = err.message; box.append(d); }
+  }
+  $('#aq').oninput = () => { clearTimeout(atimer); atimer = setTimeout(loadAdminUsers, 250); };
+  $('#agive').onclick = () => {
+    const nick = $('#anick').value;
+    if (!nick) { note(abox, 'Сначала выбери аккаунт в списке', 'bad'); return; }
+    if (confirm('Выдать права администратора аккаунту «' + nick + '»? Он увидит панель, оплаты и коды.')) setAdmin(nick, true);
+  };
 
   // ---------- выдача версии ----------
   const vbox = $('#vgrant');
