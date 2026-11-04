@@ -39,6 +39,14 @@
   td.until.off { color: var(--bad); }
   textarea { display: block; width: 100%; margin: 14px 0 10px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #08080a; color: var(--text); font: 16px/1.6 ui-monospace, Consolas, monospace; resize: vertical; }
   [hidden] { display: none !important; }
+  .ulist { max-height: 260px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
+  .uitem { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: 0; border-top: 1px solid var(--line);
+    border-radius: 0; background: transparent; color: var(--text); font: 15px Onest, sans-serif; text-align: left; cursor: pointer; }
+  .uitem:first-child { border-top: 0; }
+  .uitem:hover, .uitem.sel { background: rgba(255,255,255,.06); }
+  .uitem small { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .uitem small.on { color: var(--gold); }
+  .uempty { padding: 12px 14px; color: var(--muted); font-size: 14px; }
   .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .stat { padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: #0b0b0e; }
   .stat b { display: block; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -78,6 +86,20 @@
       <button class="gold">Выдать</button>
       <p class="note"></p>
     </form>
+    <div class="card" id="vgrant">
+      <div class="who" style="margin-bottom:12px"><span><b>Выдача версии</b> — лаунчер этого аккаунта предложит обновиться до неё, даже если она тестовая</span></div>
+      <label>Поиск аккаунта<input id="vq" type="search" placeholder="Ник или почта" autocomplete="off" maxlength="32"></label>
+      <div class="ulist" id="vusers" role="listbox" aria-label="Аккаунты"></div>
+      <div class="row" style="margin-top:14px">
+        <label>Аккаунт<input id="vnick" readonly placeholder="Выбери в списке"></label>
+        <label>Версия<select id="vver"><option value="">Загрузка…</option></select></label>
+      </div>
+      <div class="row">
+        <button class="gold" type="button" id="vgive">Выдать версию</button>
+        <button class="ghost" type="button" id="vtake" style="width:100%">Снять выдачу</button>
+      </div>
+      <p class="note"></p>
+    </div>
     <div class="card">
       <div class="who" style="margin-bottom:6px"><span>У кого Премиум</span><button class="ghost" id="reload" type="button">Обновить</button></div>
       <table><thead><tr><th>Ник</th><th>До</th></tr></thead><tbody id="list"></tbody></table>
@@ -153,6 +175,8 @@
       $('#me').textContent = myNick;
       f.hidden = true; $('#panel').hidden = false;
       loadStats();
+      loadVersions();
+      loadUsers();
       loadList();
       loadPays();
       loadCodes();
@@ -252,6 +276,66 @@
     } catch (err) { failRow(body, 4, err); }
   }
   $('#reloadPays').onclick = loadPays;
+
+  // ---------- выдача версии ----------
+  const vbox = $('#vgrant');
+  let vtimer = null;
+
+  async function loadVersions() {
+    const sel = $('#vver');
+    try {
+      const list = await req('GET', '/admin/versions');
+      sel.innerHTML = '';
+      if (!list.length) sel.innerHTML = '<option value="">GitHub не ответил</option>';
+      for (const r of list) {
+        const o = document.createElement('option');
+        o.value = r.version; o.textContent = r.version + (r.prerelease ? ' — тестовая' : '');
+        sel.append(o);
+      }
+    } catch (err) { sel.innerHTML = ''; const o = document.createElement('option'); o.value = ''; o.textContent = err.message; sel.append(o); }
+  }
+
+  async function loadUsers() {
+    const box = $('#vusers');
+    try {
+      const items = await req('GET', '/admin/users?q=' + encodeURIComponent($('#vq').value.trim()));
+      box.innerHTML = '';
+      if (!items.length) { box.innerHTML = '<div class="uempty">Никого не нашлось</div>'; return; }
+      for (const u of items) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'uitem' + (u.nick === $('#vnick').value ? ' sel' : ''); b.setAttribute('role', 'option');
+        const n = document.createElement('span'); n.textContent = u.nick;
+        const s = document.createElement('small');
+        if (u.version) { s.textContent = 'выдана ' + u.version; s.className = 'on'; }
+        else s.textContent = u.created ? 'с ' + fmt(u.created) : '';
+        b.append(n, s);
+        b.onclick = () => {
+          $('#vnick').value = u.nick;
+          if (u.version) $('#vver').value = u.version;
+          box.querySelectorAll('.uitem').forEach(x => x.classList.toggle('sel', x === b));
+          note(vbox, u.version ? 'У «' + u.nick + '» выдана ' + u.version : '');
+        };
+        box.append(b);
+      }
+    } catch (err) { box.innerHTML = ''; const d = document.createElement('div'); d.className = 'uempty'; d.textContent = err.message; box.append(d); }
+  }
+  $('#vq').oninput = () => { clearTimeout(vtimer); vtimer = setTimeout(loadUsers, 250); };
+
+  async function setVersion(version) {
+    const nick = $('#vnick').value;
+    if (!nick) { note(vbox, 'Сначала выбери аккаунт в списке', 'bad'); return; }
+    if (version === '') { note(vbox, 'Выбери версию', 'bad'); return; }
+    const btns = vbox.querySelectorAll('button'); btns.forEach(b => b.disabled = true);
+    note(vbox, version ? 'Выдаю…' : 'Снимаю…');
+    try {
+      await req('POST', '/admin/version', { nick, version: version || '' });
+      note(vbox, version ? 'Готово: «' + nick + '» получит ' + version + ' при следующем запуске лаунчера' : 'Выдача у «' + nick + '» снята', 'ok');
+      loadUsers();
+    } catch (err) { note(vbox, err.message, 'bad'); }
+    btns.forEach(b => b.disabled = false);
+  }
+  $('#vgive').onclick = () => setVersion($('#vver').value);
+  $('#vtake').onclick = () => setVersion(null);
 
   // ---------- коды ----------
   const PLAN = d => d === 0 ? 'Навсегда' : d === 365 ? 'Год' : d === 30 ? 'Месяц' : d + ' дн.';
