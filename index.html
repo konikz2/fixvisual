@@ -1463,7 +1463,7 @@
   // ===================== переходы при прокрутке =====================
   (function scenes() {
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const NAMES = { '#top': ['00', 'Начало'], '#menu': ['01', 'Меню'], '#features': ['02', 'Функции'], '#download': ['03', 'Скачать'], '#prices': ['04', 'Цены'] };
+    const NAMES = { '#top': ['00', 'Начало'], '#menu': ['01', 'Меню'], '#features': ['02', 'Функции'], '#news': ['03', 'Новое'], '#download': ['04', 'Скачать'], '#gifts': ['05', 'Подарки'], '#ideas': ['06', 'Идеи'], '#prices': ['07', 'Цены'] };
 
     // плавная прокрутка колесом с инерцией (тачпады и телефоны — как есть)
     let target = scrollY, cur = scrollY, gliding = false;
@@ -1523,7 +1523,13 @@
       if (busy) return;
       busy = true;
       sh.classList.add('on');
-      const [num, name] = NAMES[sel] || ['', ''];
+      // раздела нет в списке — название из ссылки меню, номер по порядку
+      let [num, name] = NAMES[sel] || ['', ''];
+      if (!name) {
+        const link = document.querySelector('nav a[href="' + sel + '"]');
+        name = link ? link.textContent.trim() : '';
+        num = String(Object.keys(NAMES).length).padStart(2, '0');
+      }
       lbl.querySelector('small').textContent = '/ ' + num;
       lbl.querySelector('b').textContent = name;
       const IN = 'cubic-bezier(.7,0,.3,1)';
