@@ -19,6 +19,8 @@
   @font-face { font-family: 'JetBrains Mono'; src: url(fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'Instrument Serif'; src: url(fonts/instrument-serif-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'Instrument Serif'; src: url(fonts/instrument-serif-latin-400-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+  .off, .off * { animation-play-state: paused !important; }
+  @media (pointer: coarse) { #glow { display: none; } }
 </style>
 <style>
   .agree { display: flex !important; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45; color: var(--muted); cursor: pointer; }
@@ -64,7 +66,6 @@
   #words span {
     position: absolute; left: 0; top: 0; white-space: nowrap; font-weight: 600; color: #fff;
     padding: 6px 12px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.05);
-    will-change: transform;
   }
   /* у каждой функции своя форма */
   #words .s0 { border-radius: 999px; }
@@ -79,7 +80,7 @@
   #fire { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
   #glow {
     position: fixed; left: 0; top: 0; z-index: 60; width: 520px; height: 520px; margin: -260px 0 0 -260px;
-    border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+    border-radius: 50%; pointer-events: none;
     background: radial-gradient(circle, rgba(255,255,255,.06), rgba(255,255,255,.02) 40%, transparent 70%);
     transition: opacity .3s;
   }
@@ -266,7 +267,7 @@
   .wet { height: 140px; border-radius: 14px; overflow: hidden; position: relative; background: linear-gradient(#141416 0 50%, #08080a 50%); }
   .wet .city { position: absolute; left: 0; right: 0; bottom: 50%; height: 60px; display: flex; align-items: flex-end; gap: 6px; padding: 0 14px; }
   .wet .city i { flex: 1; background: linear-gradient(#a1a1aa, #3f3f46); border-radius: 3px 3px 0 0; }
-  .wet .city.mir { top: 50%; bottom: auto; align-items: flex-start; opacity: .35; filter: blur(1.5px); }
+  .wet .city.mir { top: 50%; bottom: auto; align-items: flex-start; opacity: .3; }
   .wet .city.mir i { border-radius: 0 0 3px 3px; background: linear-gradient(#3f3f46, #a1a1aa); }
   .wet .drop { position: absolute; width: 30px; height: 8px; border-radius: 50%; border: 1px solid rgba(220,220,225,.6); animation: drop 2s infinite; }
   @keyframes drop { from { transform: scale(.2); opacity: 1; } to { transform: scale(2); opacity: 0; } }
@@ -371,10 +372,8 @@
   /* надпись внизу с мягким свечением */
   .outro { padding: 140px 0 120px; text-align: center; }
   .outro h2 { font-size: clamp(44px, 8vw, 110px); line-height: .95; color: #e4e4e7;
-    text-shadow: 0 0 18px rgba(255,255,255,.25), 0 0 60px rgba(255,255,255,.12), 0 0 120px rgba(255,255,255,.06);
-    animation: breathe 6s ease-in-out infinite; }
+    text-shadow: 0 0 18px rgba(255,255,255,.22), 0 0 50px rgba(255,255,255,.1); }
   .outro h2 em { color: #71717a; }
-  @keyframes breathe { 50% { text-shadow: 0 0 24px rgba(255,255,255,.35), 0 0 80px rgba(255,255,255,.16), 0 0 160px rgba(255,255,255,.08); } }
   .outro p { margin-top: 18px; color: #8f8f99; font: 14px "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
   .price .btn { margin-top: auto; }
 
@@ -418,7 +417,7 @@
 
   /* ===== моушн: всё движется по одной кривой — быстрый старт, долгое мягкое торможение ===== */
   :root { --ease: cubic-bezier(.16,1,.3,1); }
-  .rv { transform: translateY(44px) scale(.97); filter: blur(10px); transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease); }
+  .rv { transform: translateY(44px) scale(.97); transition: opacity .9s var(--ease), transform .9s var(--ease); }
   .rv.in { filter: none; }
   .tiltable { position: relative; }
   .tiltable.in { transition: opacity .9s var(--ease), filter .9s var(--ease), transform .6s var(--ease), border-color .25s; }
@@ -436,7 +435,7 @@
   .hero .vs { animation-delay: .75s; }
   .hero p { animation-delay: .85s; }
   .hero .cta { animation-delay: .95s; }
-  @keyframes rise { from { opacity: 0; transform: translateY(26px); filter: blur(8px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(26px); } }
 
   /* кнопки: волна от точки нажатия */
   .btn { position: relative; overflow: hidden; isolation: isolate; transition: background .2s, border-color .2s, color .2s, transform .5s var(--ease); }
@@ -503,6 +502,8 @@
     .rv, .split .wi { transition: none !important; filter: none !important; transform: none !important; opacity: 1 !important; }
     .hero .tag, .hero .vs, .hero p, .hero .cta, #graph * { animation: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; }
   }
+  .off, .off * { animation-play-state: paused !important; }
+  @media (pointer: coarse) { #glow { display: none; } }
 </style>
 </head>
 <body>
@@ -1207,8 +1208,11 @@
   if ($('#voice')) $('#voice').innerHTML = Array.from({ length: 40 }, (_, i) => `<i style="height:${20 + Math.abs(Math.sin(i * .7)) * 80}%;animation-delay:${-i * .05}s"></i>`).join('');
 
   // ===================== летающие функции (под огнём) =====================
+  // телефоны и слабые компьютеры: меньше фона и без 3D-разворота разделов
+  const low = matchMedia('(pointer: coarse)').matches || innerWidth < 800 || (navigator.hardwareConcurrency || 8) <= 4;
   const words = $('#words');
-  const flyers = all().map(m => {
+  const flyList = all().sort(() => Math.random() - .5).slice(0, low ? 14 : 44);
+  const flyers = flyList.map(m => {
     const s = document.createElement('span');
     s.textContent = m[0];
     s.className = 's' + Math.floor(Math.random() * 9);
@@ -1220,9 +1224,10 @@
   });
   let last = performance.now();
   (function fly(t) {
-    requestAnimationFrame(fly);
-    // слова плывут медленно — 30 кадров в секунду глазу не отличить, а работы вдвое меньше
-    if (t - last < 32) return;
+    // на слабых устройствах слова стоят: меняются только при первом кадре
+    if (!low) requestAnimationFrame(fly);
+    // слова плывут медленно — 20 кадров в секунду глазу не отличить
+    if (!low && t - last < 48) return;
     const dt = Math.min(50, t - last); last = t;
     const W = innerWidth, H = innerHeight, span = H * 1.2;
     flyers.forEach(f => {
@@ -1246,7 +1251,7 @@
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
         return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
       void main(){
         vec2 uv=gl_FragCoord.xy/R; vec2 q=vec2(uv.x*R.x/R.y,uv.y);
         // языки пламени поднимаются снизу и завихряются
@@ -1262,8 +1267,7 @@
         c=mix(c,vec3(.95),smoothstep(.85,1.1,fl)*.6);
         // сигаретный дым в воздухе: тонкие завитки поднимаются и медленно расплываются
         vec2 sq=q*vec2(2.2,1.4)+vec2(0.,-T*.12);
-        vec2 sw=vec2(fbm(sq+vec2(T*.05,0.)),fbm(sq+vec2(3.1,1.7)-vec2(0.,T*.04)));
-        float strand=fbm(sq*1.3+sw*2.6);
+        float strand=fbm(sq*1.3+w*2.2);
         float wisp=pow(1.-abs(strand*2.-1.),9.)*smoothstep(.05,.6,uv.y)*.55;
         c=mix(c,vec3(.78),wisp);
         gl_FragColor=vec4(c,clamp(fl*1.5+.12+wisp*.9,0.,.97));
@@ -1279,17 +1283,19 @@
     const uR = gl.getUniformLocation(pr, 'R'), uT = gl.getUniformLocation(pr, 'T');
     // треть разрешения (огонь всё равно мягкий и размытый) и не больше 960 точек по ширине
     function size() {
-      const k = Math.min(1 / 3, 960 / Math.max(1, innerWidth));
+      const k = Math.min(1 / 3, (low ? 180 : 420) / Math.max(1, innerWidth));
       cv.width = Math.max(1, Math.round(innerWidth * k)); cv.height = Math.max(1, Math.round(innerHeight * k));
       gl.viewport(0, 0, cv.width, cv.height);
       gl.uniform2f(uR, cv.width, cv.height);
     }
     size(); addEventListener('resize', size);
-    // 30 кадров в секунду и пауза на скрытой вкладке
-    let lastDraw = -1e9;
+    // 24 кадра в секунду (на слабых 12) и пауза на скрытой вкладке; на слабых — и пока крутят страницу
+    let lastDraw = -1e9, scrolled = 0;
+    addEventListener('scroll', () => { scrolled = performance.now(); }, { passive: true });
     (function loop(t) {
       requestAnimationFrame(loop);
-      if (document.hidden || t - lastDraw < 32) return;
+      if (document.hidden || t - lastDraw < (low ? 80 : 40)) return;
+      if (low && lastDraw > 0 && t - scrolled < 200) return;
       lastDraw = t;
       gl.uniform1f(uT, t / 1000);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -1575,6 +1581,10 @@
       window.fvGo(href);
     });
 
+    // карточки с бесконечными анимациями замирают, когда их не видно
+    const io = new IntersectionObserver(l => l.forEach(x => x.target.classList.toggle('off', !x.isIntersecting)), { rootMargin: '120px' });
+    document.querySelectorAll('.f, .dl, .price').forEach(el => io.observe(el));
+
     if (calm) return;
     // размеры читаются только при изменении окна — в кадре одни записи, без пересчёта раскладки
     const secs = [...document.querySelectorAll('main > section')].map(el => ({ el, top: 0, h: 0, last: '' }));
@@ -1615,8 +1625,8 @@
           graph.style.transform = `scale(${1 + s * .35}) rotate(${s * -4}deg)`;
         }
 
-        // разделы: вход (e) и уход (q)
-        secs.forEach(o => {
+        // разделы: вход (e) и уход (q); на слабых устройствах большой 3D-разворот не считаем
+        if (!low) secs.forEach(o => {
           const top = o.top - y, bottom = top + o.h;
           let e = clamp((H - top) / (H * .8), 0, 1);
           e = 1 - Math.pow(1 - e, 3);
