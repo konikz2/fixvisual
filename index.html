@@ -159,10 +159,8 @@
   @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats div:nth-child(3) { border-left: 0; } .stats div:nth-child(n+3) { border-top: 1px solid var(--line); } }
 
   /* ===== наше меню (копия ClickGuiGlassScreen) ===== */
-  /* меню изогнуто (как экран FixOS) и выпрямляется, пока прокручиваешь к нему */
-  .scene-wrap { perspective: 1400px; margin-top: 44px; }
-  .scene { position: relative; border-radius: 26px; overflow: hidden; border: 1px solid var(--line); padding: 40px; background: #0a0a0b;
-    transform-origin: 50% 100%; will-change: transform; transform: rotateX(var(--bend, 0deg)) scale(var(--sc, 1)); border-top-left-radius: var(--curve, 26px) 60px; border-top-right-radius: var(--curve, 26px) 60px; }
+  .scene-wrap { margin-top: 44px; }
+  .scene { position: relative; border-radius: 26px; overflow: hidden; border: 1px solid var(--line); padding: 40px; background: #0a0a0b; }
   .scene::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.27); }
   @media (max-width: 900px) { .scene { padding: 10px; } }
   .gw {
@@ -245,40 +243,16 @@
   /* ===== свои функции ===== */
   .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 48px; }
   @media (max-width: 860px) { .feat { grid-template-columns: 1fr; } }
-  .f { padding: 30px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); min-height: 280px; display: flex; flex-direction: column; transition: border-color .25s; }
+  .f { padding: 30px; border-radius: 22px; background: var(--solid); border: 1px solid var(--line); display: flex; flex-direction: column; transition: border-color .25s; }
   .f:hover { border-color: var(--line-2); }
   .f.wide { grid-column: 1 / -1; }
   .f .n { font-size: 13px; color: #8f8d9a; font-variant-numeric: tabular-nums; }
-  .f h3 { font-size: 40px; line-height: 1; margin-top: 10px; }
+  .f h3 { font-size: 24px; line-height: 1.2; font-weight: 600; letter-spacing: -.01em; }
   .f p { margin-top: 12px; color: #a9a6b4; max-width: 460px; }
   .f .demo { margin-top: auto; padding-top: 24px; }
-  .os { aspect-ratio: 16 / 6; perspective: 700px; }
-  .os .scr { height: 100%; border-radius: 14px; border: 1px solid var(--line-2); background: linear-gradient(135deg, #18181b, #0a0a0b); transform: rotateY(-14deg) rotateX(4deg); padding: 10px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; box-shadow: 0 20px 60px -20px rgba(200,200,205,.5); }
-  .os .win { border-radius: 8px; background: rgba(255,255,255,.05); border: 1px solid var(--line); padding: 8px; font-size: 11px; color: var(--muted); }
-  .os .win b { color: var(--text); display: block; margin-bottom: 4px; font-size: 12px; }
-  .os .clock { font-size: 26px; color: #fff; }
-  .call { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.05); border: 1px solid var(--line); max-width: 380px; }
-  .call .ava { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a1a1aa); display: grid; place-items: center; font-weight: 700; position: relative; flex: none; }
-  .call .ava::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--accent); animation: ring 1.4s infinite; }
-  @keyframes ring { from { transform: scale(.9); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
-  .call .who span { display: block; color: var(--muted); font-size: 13px; }
-  .call .act { margin-left: auto; display: flex; gap: 8px; }
-  .call .act i { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 18px; }
-  .wet { height: 140px; border-radius: 14px; overflow: hidden; position: relative; background: linear-gradient(#141416 0 50%, #08080a 50%); }
-  .wet .city { position: absolute; left: 0; right: 0; bottom: 50%; height: 60px; display: flex; align-items: flex-end; gap: 6px; padding: 0 14px; }
-  .wet .city i { flex: 1; background: linear-gradient(#a1a1aa, #3f3f46); border-radius: 3px 3px 0 0; }
-  .wet .city.mir { top: 50%; bottom: auto; align-items: flex-start; opacity: .3; }
-  .wet .city.mir i { border-radius: 0 0 3px 3px; background: linear-gradient(#3f3f46, #a1a1aa); }
-  .wet .drop { position: absolute; width: 30px; height: 8px; border-radius: 50%; border: 1px solid rgba(220,220,225,.6); animation: drop 2s infinite; }
-  @keyframes drop { from { transform: scale(.2); opacity: 1; } to { transform: scale(2); opacity: 0; } }
-  .voice { display: flex; align-items: center; gap: 4px; height: 56px; }
-  .voice i { flex: 1; max-width: 6px; border-radius: 4px; background: var(--accent); animation: wave 1s ease-in-out infinite; }
-  @keyframes wave { 50% { transform: scaleY(.25); } }
-  .ice { display: flex; gap: 8px; align-items: flex-end; height: 100px; }
-  .ice i { width: 18px; background: linear-gradient(#f4f4f5, #a1a1aa 60%, #52525b); clip-path: polygon(50% 0, 100% 30%, 85% 100%, 15% 100%, 0 30%); opacity: .85; animation: shatter 3s ease-in-out infinite; }
-  @keyframes shatter { 70% { transform: none; opacity: .85; } 85% { transform: translateY(-30px) rotate(25deg); opacity: 0; } }
   .news .f { min-height: 0; }
-  .news .f h3 { font-size: 32px; }
+  .news .f h3 { font-size: 24px; }
+  .trust { text-align: center; margin: 56px 0 24px; }
   .news .ver { align-self: flex-start; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); font: 12px "JetBrains Mono", monospace; color: #8f8d9a; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chips span { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; color: #d8d6e0; }
@@ -475,13 +449,10 @@
   #tl .kf:hover span { opacity: 1; }
   footer { padding-bottom: 84px; }
 
-  /* разделы — панели: въезжают снизу с наклоном, уходя — отъезжают вглубь и темнеют */
-  main > section { position: relative; transform-origin: 50% 0; background: linear-gradient(rgba(10,10,12,.5), rgba(10,10,12,.25)); border-top: 1px solid var(--line); }
-  main > section::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; background: #000; opacity: var(--dim, 0); }
-  main > section.outro { background: none; border-top: 0; }
+  main > section { position: relative; }
 
   /* бегущие строки между разделами: скорость и наклон — от скорости прокрутки */
-  .band { position: relative; overflow: hidden; padding: 26px 0; border-top: 1px solid var(--line); background: rgba(5,5,6,.55); user-select: none; }
+  .band { position: relative; overflow: hidden; padding: 26px 0; user-select: none; }
   .band .bt { display: flex; width: max-content; white-space: nowrap; will-change: transform; }
   .band span { font-family: "Instrument Serif", Georgia, serif; font-size: clamp(56px, 9vw, 124px); line-height: 1; padding-right: .3em;
     color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.3); }
@@ -560,9 +531,10 @@
   </div>
 
   <div class="wrap">
+    <h2 class="serif title trust rv">Нам уже доверяют</h2>
     <div class="stats rv">
-      <div><b class="serif" data-count="120" data-plus>0</b><span>функций</span></div>
-      <div><b class="serif" data-count="6">0</b><span>категорий в меню</span></div>
+      <div><b class="serif" data-count="300" data-plus>0</b><span>скачиваний</span></div>
+      <div><b class="serif" data-count="130" data-plus>0</b><span>бесплатных функций</span></div>
       <div><b class="serif" data-count="12">0</b><span>модов оптимизации на выбор</span></div>
       <div><b class="serif">0 ₽</b><span>навсегда</span></div>
     </div>
@@ -613,77 +585,52 @@
       </div>
       <div class="feat">
         <div class="f wide rv">
-          <h3 class="serif">Мокрый пол</h3>
-          <p>Вся земля до края прорисовки становится мокрой: у горизонта отражается небо, под мобами и блоками — они сами, по воде бегут волны. Скорость волн и прозрачность настраиваются.</p>
-          <div class="demo"><div class="wet">
-            <div class="city"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
-            <div class="city mir"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
-            <span class="drop" style="left:20%;top:70%"></span><span class="drop" style="left:60%;top:80%;animation-delay:-.7s"></span><span class="drop" style="left:80%;top:62%;animation-delay:-1.3s"></span>
-          </div></div>
+          <h3>Мокрый пол</h3>
+          <p>Вся земля до края прорисовки становится мокрой, по ней бегут волны. Скорость волн и прозрачность настраиваются.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Солнце</h3>
-          <p>Тени от блоков и деревьев, тёплый свет, лучи через всё небо и блики в одной функции. Само солнце теперь круглое.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>Тени</span><span>Лучи</span><span>Блики</span><span>Круглое солнце</span></div>
+          <h3>Солнце</h3>
+          <p>Тени от блоков и деревьев, тёплый свет, лучи через всё небо и блики. Само солнце круглое.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">TNT</h3>
-          <p>Таймер над подожжённым динамитом, ударные волны, искры и тряска камеры. Заряды ветра включаются отдельно.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>Таймер</span><span>Ударные волны</span><span>Сила тряски</span></div>
+          <h3>TNT</h3>
+          <p>Таймер над динамитом, ударные волны, искры и тряска камеры. Заряды ветра включаются отдельно.</p>
         </div>
         <div class="f wide rv">
-          <h3 class="serif">Redstone Helper</h3>
-          <p>63 машины: от пускателя TNT до автоплавильни. Выбираешь нужную, и она встаёт голограммой из настоящих блоков, строишь прямо по ней. Свои схемы .schem тоже подходят.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>TNT</span><span>Генераторы</span><span>Свет</span><span>Логика</span><span>Двери</span><span>Лифты</span><span>Ловушки</span><span>Звонки</span></div>
+          <h3>Redstone Helper</h3>
+          <p>63 машины: от пускателя TNT до автоплавильни. Выбираешь нужную, и она встаёт голограммой из настоящих блоков. Свои схемы .schem тоже подходят.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Atmosphere</h3>
-          <p>Зима, алое небо и закат: небо, туман и трава меняют цвет, а даль мягко размывается.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>Зима</span><span>Алое</span><span>Закат</span></div>
+          <h3>Atmosphere</h3>
+          <p>Зима, алое небо и закат: меняются небо, туман и трава, а даль мягко размывается.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">HUD «Обсидиан»</h3>
-          <p>Маленькие чёрные плашки вместо панелей: Target HUD, списки, инвентарь, уведомления и ники над игроками в одном стиле.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>Target HUD</span><span>Name Tags</span><span>Уведомления</span></div>
+          <h3>HUD «Обсидиан»</h3>
+          <p>Маленькие чёрные плашки вместо панелей: Target HUD, списки, инвентарь и ники над игроками в одном стиле.</p>
         </div>
         <div class="f wide rv">
-          <h3 class="serif">FixOS</h3>
-          <p>Компьютер прямо в мире. Изогнутый экран перед глазами: окна, музыка, часы и настоящий браузер. Размер — колёсиком. Друзья с FixVisual видят твой экран перед твоей головой.</p>
-          <div class="demo os"><div class="scr">
-            <div class="win"><b>Браузер</b>youtube.com · гайды по PvP</div>
-            <div class="win"><b>Часы</b><div class="clock serif">23:47</div>Музыка: Lo-fi radio ▸</div>
-          </div></div>
+          <h3>FixOS</h3>
+          <p>Компьютер прямо в мире: окна, музыка, часы и настоящий браузер. Друзья с FixVisual видят твой экран перед твоей головой.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Звонки</h3>
-          <p>Звонки друзьям прямо в игре, без Discord. Входящий всплывает карточкой: принять или сбросить. Свои рингтоны.</p>
-          <div class="demo"><div class="call">
-            <div class="ava">S</div>
-            <div class="who"><b>Steve_PvP</b><span>Входящий звонок…</span></div>
-            <div class="act"><i style="background:var(--bad)">✕</i><i style="background:var(--good)">✆</i></div>
-          </div></div>
+          <h3>Звонки</h3>
+          <p>Звони друзьям прямо в игре, без Discord. Входящий звонок всплывает карточкой, рингтоны свои.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Спонсор</h3>
-          <p>Префикс «Спонсор» в табе и над ником, переливается градиентом — 9 на выбор. Включён сразу, выключается в меню. Поменяй градиент в меню выше, в «Косметике».</p>
-          <div class="demo sp-demo" id="sp-demo"></div>
+          <h3>Спонсор</h3>
+          <p>Префикс в табе и над ником, переливается градиентом. На выбор 9 градиентов.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Голосовой помощник</h3>
-          <p>«Фикс, включи небо» — и он включит. Пишет в чат, заходит на сервер, отвечает голосом. Работает офлайн.</p>
-          <div class="demo"><div class="voice" id="voice"></div></div>
+          <h3>Голосовой помощник</h3>
+          <p>«Фикс, включи небо» — и он включит. Пишет в чат, заходит на сервер, работает офлайн.</p>
         </div>
         <div class="f rv">
-          <h3 class="serif">Эффекты убийства</h3>
-          <p>После убийства противник замерзает в лёд вместе с моделью, а кристаллы разлетаются. Ещё пепел и разрыв.</p>
-          <div class="demo"><div class="ice">
-            <i style="height:50%"></i><i style="height:80%;animation-delay:-.3s"></i><i style="height:100%;animation-delay:-.6s"></i><i style="height:70%;animation-delay:-.2s"></i><i style="height:90%;animation-delay:-.5s"></i><i style="height:55%;animation-delay:-.8s"></i><i style="height:75%;animation-delay:-.4s"></i>
-          </div></div>
+          <h3>Эффекты убийства</h3>
+          <p>Противник замерзает в лёд вместе с моделью, а кристаллы разлетаются. Ещё есть пепел и разрыв.</p>
         </div>
         <div class="f wide rv">
-          <h3 class="serif">Косметика и Тренер</h3>
-          <p>Крылья, шапки, рюкзаки, ангел и демон на плечах, эмоции — видят все с FixVisual. А в одиночном мире — бот-соперник: криты, перлы, бафы, три сложности.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>20 видов крыльев</span><span>Драконьи</span><span>Кристальные</span><span>Сакура</span><span>Кибер</span><span>Джетпак</span><span>Пингвин</span><span>Корона</span><span>Нимб</span><span>Тренер: Mace</span><span>Перекрит</span><span>Вагонетки</span></div>
+          <h3>Косметика и Тренер</h3>
+          <p>Крылья, шапки, рюкзаки и эмоции видят все с FixVisual. А в одиночном мире тебя ждёт бот-соперник: криты, перлы, бафы и три сложности.</p>
         </div>
       </div>
     </div>
@@ -800,8 +747,7 @@
       <div class="gifts-top" data-gifts-top></div>
       <div class="gcards" data-gifts></div>
       <p class="gifts-note" data-gifts-note></p>
-      <p class="gifts-odds">В карточке: Премиум на месяц — 5,5% · на год — 2,5% · навсегда — 0,5% · 30 ₽ на баланс — 17,5% · свой префикс — 3,5% ·
-        скидка 11% — 10% · скидка 25% — 4% · скидка 40% — 1% · пусто — 55,5%.<br>Баланс и скидки — на покупку Премиума, скидка действует 30 дней. Свой префикс — функция «Custom Prefix» в моде: надпись и цвета на выбор.</p>
+      <p class="gifts-odds">Баланс и скидки — на покупку Премиума, скидка действует 30 дней. Свой префикс — функция «Custom Prefix» в моде: надпись и цвета на выбор.</p>
     </div>
   </section>
 
@@ -836,7 +782,7 @@
         <div class="price rv">
           <div class="name">FixVisual</div>
           <div class="sum serif">0 ₽ <small>навсегда</small></div>
-          <ul><li>Все 120+ функций</li><li>Меню, HUD, косметика</li><li>Звонки и FixOS</li><li>Автообновления</li></ul>
+          <ul><li>Все 130+ бесплатных функций</li><li>Меню, HUD, косметика</li><li>Звонки и FixOS</li><li>Автообновления</li></ul>
           <a class="btn" href="#download">Скачать</a>
         </div>
         <div class="price hot rv">
@@ -864,7 +810,7 @@
     <a class="logo" href="#top"><i></i>FixVisual</a>
     <small>Бесплатный визуал для Minecraft. Не является читом. Не связан с Mojang и Microsoft.</small>
     <div class="foot-legal"><a href="terms.html">Пользовательское соглашение</a><a href="terms.html#refund">Оплата и возврат</a><a href="privacy.html">Политика конфиденциальности</a><a href="consent.html">Согласие на обработку данных</a><a href="consent-public.html">Согласие на распространение</a><a href="cookies.html">Политика cookie</a><button type="button" data-acc="delete-open">Удалить мои данные</button></div>
-    <small class="seller">Связь: <a href="https://github.com/konikz2/fixvisual/issues">github.com/konikz2/fixvisual/issues</a> · Реквизиты продавца — в <a href="terms.html#seller">соглашении</a></small>
+    <small class="seller">Связь: <a href="https://t.me/FixVisualBot">@FixVisualBot</a>, команда /связь · Реквизиты продавца — в <a href="terms.html#seller">соглашении</a></small>
   </div>
 </footer>
 
@@ -920,7 +866,7 @@
       <label class="opt"><input type="radio" name="plan" value="year"> Год<span>329 ₽</span></label>
       <label class="opt"><input type="radio" name="plan" value="forever"> Навсегда<span>449 ₽</span></label>
       <div class="buy-extra">
-        <label>Промокод<input type="text" name="promo" autocomplete="off" spellcheck="false" maxlength="24" placeholder="Например, FixVisual"></label>
+        <label>Промокод<input type="text" name="promo" autocomplete="off" spellcheck="false" maxlength="24" placeholder="FixVisual"></label>
         <label data-coupon-row hidden>Скидка из подарка<select name="coupon"></select></label>
         <label class="agree" data-balance-row hidden><input type="checkbox" name="balance"> <span data-balance-text>Списать с баланса</span></label>
       </div>
@@ -1309,19 +1255,6 @@
   document.addEventListener('mouseleave', () => { glow.style.opacity = 0; });
   document.addEventListener('mouseenter', () => { glow.style.opacity = 1; });
 
-  // меню: изогнуто, пока далеко, и выпрямляется по мере прокрутки к нему
-  const scene = $('.scene');
-  function bend() {
-    const r = scene.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, (innerHeight - r.top) / (innerHeight * .75)));
-    const k = 1 - p * p * (3 - 2 * p);
-    scene.style.setProperty('--bend', (k * 32).toFixed(2) + 'deg');
-    scene.style.setProperty('--sc', (1 - k * .08).toFixed(3));
-    scene.style.setProperty('--curve', (26 + k * 400).toFixed(0) + 'px');
-  }
-  addEventListener('scroll', bend, { passive: true });
-  addEventListener('resize', bend);
-  bend();
   // свечение двигается, только пока не догнало курсор
   (function g() {
     requestAnimationFrame(g);
@@ -1587,13 +1520,11 @@
 
     if (calm) return;
     // размеры читаются только при изменении окна — в кадре одни записи, без пересчёта раскладки
-    const secs = [...document.querySelectorAll('main > section')].map(el => ({ el, top: 0, h: 0, last: '' }));
     const h1 = $('.hero h1'), heroWrap = $('.hero .wrap'), graph = $('#graph');
     const words = [...h1.querySelectorAll('.w')];
     let H = innerHeight;
     const measure = () => {
       H = innerHeight;
-      secs.forEach(o => { o.top = o.el.offsetTop; o.h = o.el.offsetHeight; o.last = ''; });
       bands.forEach(b => b.half = b.bt.scrollWidth / 2);
     };
     measure();
@@ -1625,25 +1556,6 @@
           graph.style.transform = `scale(${1 + s * .35}) rotate(${s * -4}deg)`;
         }
 
-        // разделы: вход (e) и уход (q); на слабых устройствах большой 3D-разворот не считаем
-        if (!low) secs.forEach(o => {
-          const top = o.top - y, bottom = top + o.h;
-          let e = clamp((H - top) / (H * .8), 0, 1);
-          e = 1 - Math.pow(1 - e, 3);
-          const q = clamp(1 - bottom / (H * .55), 0, 1);
-          const key = e.toFixed(3) + q.toFixed(3);
-          if (key === o.last) return;
-          o.last = key;
-          if ((e >= 1 && q <= 0) || top > H || bottom < 0) {
-            o.el.style.transform = o.el.style.willChange = '';
-            o.el.style.setProperty('--dim', 0);
-            return;
-          }
-          const k = 1 - e;
-          o.el.style.willChange = 'transform';
-          o.el.style.transform = `perspective(1600px) translateY(${(k * 110).toFixed(1)}px) rotateX(${(k * 10).toFixed(2)}deg) scale(${((.94 + .06 * e) * (1 - q * .08)).toFixed(4)})`;
-          o.el.style.setProperty('--dim', (q * .65).toFixed(3));
-        });
       }
 
       // бегущие строки: своя скорость + скорость прокрутки, наклон от рывка
