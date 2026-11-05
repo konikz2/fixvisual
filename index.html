@@ -13,43 +13,12 @@
   @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-600-normal.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'Onest'; src: url(fonts/onest-cyrillic-700-normal.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
   @font-face { font-family: 'Onest'; src: url(fonts/onest-latin-700-normal.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-  @font-face { font-family: 'Pixelify Sans'; src: url(fonts/pixelify-sans-cyrillic-500-normal.woff2) format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
-  @font-face { font-family: 'Pixelify Sans'; src: url(fonts/pixelify-sans-latin-500-normal.woff2) format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+2000-206F,U+2190-2193; }
   @font-face { font-family: 'JetBrains Mono'; src: url(fonts/jetbrains-mono-cyrillic-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
   @font-face { font-family: 'JetBrains Mono'; src: url(fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'JetBrains Mono'; src: url(fonts/jetbrains-mono-cyrillic-500-normal.woff2) format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
   @font-face { font-family: 'JetBrains Mono'; src: url(fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2'); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'Instrument Serif'; src: url(fonts/instrument-serif-latin-400-normal.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
   @font-face { font-family: 'Instrument Serif'; src: url(fonts/instrument-serif-latin-400-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+20BD,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-  /* ===== Фишки: окно игры с хотбаром и инвентарём ===== */
-  .fx-h { font: 500 clamp(44px, 8vw, 92px)/1 'Pixelify Sans', Onest, sans-serif; letter-spacing: 0; }
-  .fx-sub { margin: 14px 0 32px; color: #b9b7c2; font-size: 18px; }
-  .gui { --gui: #c6c6c6; padding: clamp(10px, 2vw, 20px); background: var(--gui); color: #3f3f3f;
-    box-shadow: inset 3px 3px 0 #fff, inset -3px -3px 0 #555, 0 0 0 3px #000; }
-  .view { position: relative; background: #000; box-shadow: 0 0 0 3px #373737; }
-  #fx-scene { display: block; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; }
-  .tip { position: absolute; left: 14px; bottom: 14px; max-width: min(460px, calc(100% - 28px)); padding: 10px 14px 12px; color: #f4f3f7;
-    background: rgba(16, 0, 16, .94); box-shadow: inset 0 0 0 2px #2a0a5e, 0 0 0 2px #100010; font: 500 17px/1.35 Onest, sans-serif; }
-  .tip b { display: block; font: 500 24px/1.15 'Pixelify Sans', Onest, sans-serif; color: #fff; }
-  .tip p { margin-top: 6px; color: #c9c5d6; }
-  .tip i { display: block; margin-top: 6px; font: 500 16px/1 'Pixelify Sans', Onest, sans-serif; color: #55ff55; }
-  .tip i:empty { display: none; }
-  .hotbar, .inv { display: grid; grid-template-columns: repeat(9, 1fr); gap: 0; }
-  .hotbar { margin-top: clamp(10px, 2vw, 18px); }
-  .slot { position: relative; aspect-ratio: 1; padding: 14%; border: 0; border-radius: 0; cursor: pointer; background: #8b8b8b;
-    box-shadow: inset 3px 3px 0 #373737, inset -3px -3px 0 #fff; }
-  .slot canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
-  .slot:hover { background: #a9a9a9; }
-  .slot[aria-pressed="true"] { background: #a9a9a9; outline: 4px solid #fff; outline-offset: -2px; z-index: 1; }
-  .slot:focus-visible { outline: 4px solid #ffff55; outline-offset: -2px; z-index: 2; }
-  .slot .k { position: absolute; right: 8%; bottom: 3%; font: 500 clamp(12px, 1.6vw, 18px)/1 'Pixelify Sans', sans-serif; color: #fff; text-shadow: 2px 2px 0 #3f3f3f; }
-  .slot .nm, .slot .ds { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .inv-h { margin: clamp(12px, 2vw, 18px) 0 6px; font: 500 20px/1 'Pixelify Sans', Onest, sans-serif; color: #3f3f3f; }
-  .slot.sm { padding: 18%; }
-  @media (max-width: 700px) {
-    .tip { position: static; max-width: none; }
-    .hotbar, .inv { grid-template-columns: repeat(5, 1fr); }
-  }
 </style>
 <style>
   .agree { display: flex !important; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.45; color: var(--muted); cursor: pointer; }
@@ -635,40 +604,85 @@
     </div>
   </section>
 
-  <section id="features" class="fx">
+  <section id="features">
     <div class="wrap">
-      <h2 class="fx-h">Фишки FixVisual</h2>
-      <p class="fx-sub">Выбери слот мышкой или клавишами 1–9, как в игре.</p>
-
-      <div class="gui">
-        <div class="view">
-          <canvas id="fx-scene" width="192" height="108" role="img" aria-label="Сцена выбранной функции"></canvas>
-          <div class="tip" id="fx-tip" aria-live="polite"><b></b><p></p><i></i></div>
+      <div class="rv">
+        <h2 class="serif title">Фишки FixVisual</h2>
+        <p class="lead">Функции, которые мы сделали сами с нуля.</p>
+      </div>
+      <div class="feat">
+        <div class="f wide rv">
+          <h3 class="serif">Мокрый пол</h3>
+          <p>Вся земля до края прорисовки становится мокрой: у горизонта отражается небо, под мобами и блоками — они сами, по воде бегут волны. Скорость волн и прозрачность настраиваются.</p>
+          <div class="demo"><div class="wet">
+            <div class="city"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
+            <div class="city mir"><i style="height:60%"></i><i style="height:90%"></i><i style="height:45%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:85%"></i></div>
+            <span class="drop" style="left:20%;top:70%"></span><span class="drop" style="left:60%;top:80%;animation-delay:-.7s"></span><span class="drop" style="left:80%;top:62%;animation-delay:-1.3s"></span>
+          </div></div>
         </div>
-
-        <div class="hotbar" role="group" aria-label="Основные функции">
-          <button class="slot" data-s="wet" data-i="wet" data-new="Обновлено"><span class="k">1</span><canvas width="8" height="8"></canvas><span class="nm">Мокрый пол</span><span class="ds">Вся земля до края прорисовки становится мокрой. Вода прозрачная: видно блоки, а в ней мягко отражаются мобы и небо у горизонта. Скорость волн настраивается.</span></button>
-          <button class="slot" data-s="sun" data-i="sun" data-new="Новое"><span class="k">2</span><canvas width="8" height="8"></canvas><span class="nm">Sun</span><span class="ds">Всё про солнце в одном месте: мягкие тени от блоков и деревьев, тёплый свет, лучи через всё небо и блики. Само солнце теперь круглое.</span></button>
-          <button class="slot" data-s="tnt" data-i="tnt" data-new="Новое"><span class="k">3</span><canvas width="8" height="8"></canvas><span class="nm">TNT</span><span class="ds">Таймер над подожжённым динамитом и взрывы с анимацией: вспышка, ударные волны, искры и тряска камеры. Заряды ветра включаются отдельно.</span></button>
-          <button class="slot" data-s="red" data-i="red" data-new="Новое"><span class="k">4</span><canvas width="8" height="8"></canvas><span class="nm">Redstone Helper</span><span class="ds">63 машины: от пускателя TNT до автоплавильни. Выбираешь — она встаёт голограммой из настоящих блоков, строишь поверх. Можно загрузить свои .schem.</span></button>
-          <button class="slot" data-s="os" data-i="os"><span class="k">5</span><canvas width="8" height="8"></canvas><span class="nm">FixOS</span><span class="ds">Компьютер прямо в мире. Изогнутый экран перед глазами: окна, музыка, часы и настоящий браузер. Друзья с FixVisual видят твой экран перед твоей головой.</span></button>
-          <button class="slot" data-s="call" data-i="call"><span class="k">6</span><canvas width="8" height="8"></canvas><span class="nm">Звонки</span><span class="ds">Звонки друзьям прямо в игре, без Discord. Входящий всплывает карточкой: принять или сбросить. Свои рингтоны.</span></button>
-          <button class="slot" data-s="voice" data-i="voice"><span class="k">7</span><canvas width="8" height="8"></canvas><span class="nm">Голосовой помощник</span><span class="ds">«Фикс, включи небо» — и он включит. Пишет в чат, заходит на сервер, отвечает голосом. Работает офлайн.</span></button>
-          <button class="slot" data-s="kill" data-i="kill"><span class="k">8</span><canvas width="8" height="8"></canvas><span class="nm">Эффекты убийства</span><span class="ds">После убийства противник замерзает в лёд вместе с моделью, а кристаллы разлетаются. Ещё пепел и разрыв.</span></button>
-          <button class="slot" data-s="hud" data-i="hud" data-new="Новое"><span class="k">9</span><canvas width="8" height="8"></canvas><span class="nm">HUD «Обсидиан»</span><span class="ds">Новый стиль интерфейса: маленькие чёрные плашки, значки в квадратиках, числа белым. Target HUD, списки, инвентарь и уведомления в одном виде.</span></button>
+        <div class="f rv">
+          <h3 class="serif">Солнце</h3>
+          <p>Тени от блоков и деревьев, тёплый свет, лучи через всё небо и блики в одной функции. Само солнце теперь круглое.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>Тени</span><span>Лучи</span><span>Блики</span><span>Круглое солнце</span></div>
         </div>
-
-        <h3 class="inv-h">Ещё в инвентаре</h3>
-        <div class="inv" role="group" aria-label="Другие функции">
-          <button class="slot sm" data-i="snow" data-new="Новое"><canvas width="8" height="8"></canvas><span class="nm">Atmosphere</span><span class="ds">Зима, алое небо и закат: небо, туман и трава меняют цвет, в дали мягкое размытие.</span></button>
-          <button class="slot sm" data-i="tag" data-new="Новое"><canvas width="8" height="8"></canvas><span class="nm">Name Tags</span><span class="ds">Ники над игроками в стиле HUD: голова, здоровье, броня и предметы в руках.</span></button>
-          <button class="slot sm" data-i="esp" data-new="Обновлено"><canvas width="8" height="8"></canvas><span class="nm">Target ESP</span><span class="ds">Цель светится цветом темы по всему телу и броне, по ней бежит яркая полоса.</span></button>
-          <button class="slot sm" data-i="find" data-new="Новое"><canvas width="8" height="8"></canvas><span class="nm">Craft Search</span><span class="ds">Поиск крафта рядом с инвентарём: печатаешь название, видишь сетку, клик раскладывает рецепт.</span></button>
-          <button class="slot sm" data-i="fps" data-new="Обновлено"><canvas width="8" height="8"></canvas><span class="nm">FrameSync</span><span class="ds">Оптимизация кадров без настроек: больше FPS и меньше задержка ввода.</span></button>
-          <button class="slot sm" data-i="crown"><canvas width="8" height="8"></canvas><span class="nm">Спонсор</span><span class="ds">Префикс в табе и над ником, переливается градиентом — 9 на выбор.</span></button>
-          <button class="slot sm" data-i="wing"><canvas width="8" height="8"></canvas><span class="nm">Косметика</span><span class="ds">Крылья, шапки, рюкзаки, ангел и демон на плечах, эмоции — видят все с FixVisual.</span></button>
-          <button class="slot sm" data-i="sword"><canvas width="8" height="8"></canvas><span class="nm">Тренер</span><span class="ds">Бот-соперник в одиночном мире: криты, перлы, бафы, три сложности.</span></button>
-          <button class="slot sm" data-i="car"><canvas width="8" height="8"></canvas><span class="nm">Cars</span><span class="ds">3D-машины: садишься по ПКМ, колёса крутятся, камера в салоне.</span></button>
+        <div class="f rv">
+          <h3 class="serif">TNT</h3>
+          <p>Таймер над подожжённым динамитом, ударные волны, искры и тряска камеры. Заряды ветра включаются отдельно.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>Таймер</span><span>Ударные волны</span><span>Сила тряски</span></div>
+        </div>
+        <div class="f wide rv">
+          <h3 class="serif">Redstone Helper</h3>
+          <p>63 машины: от пускателя TNT до автоплавильни. Выбираешь нужную, и она встаёт голограммой из настоящих блоков, строишь прямо по ней. Свои схемы .schem тоже подходят.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>TNT</span><span>Генераторы</span><span>Свет</span><span>Логика</span><span>Двери</span><span>Лифты</span><span>Ловушки</span><span>Звонки</span></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">Atmosphere</h3>
+          <p>Зима, алое небо и закат: небо, туман и трава меняют цвет, а даль мягко размывается.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>Зима</span><span>Алое</span><span>Закат</span></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">HUD «Обсидиан»</h3>
+          <p>Маленькие чёрные плашки вместо панелей: Target HUD, списки, инвентарь, уведомления и ники над игроками в одном стиле.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>Target HUD</span><span>Name Tags</span><span>Уведомления</span></div>
+        </div>
+        <div class="f wide rv">
+          <h3 class="serif">FixOS</h3>
+          <p>Компьютер прямо в мире. Изогнутый экран перед глазами: окна, музыка, часы и настоящий браузер. Размер — колёсиком. Друзья с FixVisual видят твой экран перед твоей головой.</p>
+          <div class="demo os"><div class="scr">
+            <div class="win"><b>Браузер</b>youtube.com · гайды по PvP</div>
+            <div class="win"><b>Часы</b><div class="clock serif">23:47</div>Музыка: Lo-fi radio ▸</div>
+          </div></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">Звонки</h3>
+          <p>Звонки друзьям прямо в игре, без Discord. Входящий всплывает карточкой: принять или сбросить. Свои рингтоны.</p>
+          <div class="demo"><div class="call">
+            <div class="ava">S</div>
+            <div class="who"><b>Steve_PvP</b><span>Входящий звонок…</span></div>
+            <div class="act"><i style="background:var(--bad)">✕</i><i style="background:var(--good)">✆</i></div>
+          </div></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">Спонсор</h3>
+          <p>Префикс «Спонсор» в табе и над ником, переливается градиентом — 9 на выбор. Включён сразу, выключается в меню. Поменяй градиент в меню выше, в «Косметике».</p>
+          <div class="demo sp-demo" id="sp-demo"></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">Голосовой помощник</h3>
+          <p>«Фикс, включи небо» — и он включит. Пишет в чат, заходит на сервер, отвечает голосом. Работает офлайн.</p>
+          <div class="demo"><div class="voice" id="voice"></div></div>
+        </div>
+        <div class="f rv">
+          <h3 class="serif">Эффекты убийства</h3>
+          <p>После убийства противник замерзает в лёд вместе с моделью, а кристаллы разлетаются. Ещё пепел и разрыв.</p>
+          <div class="demo"><div class="ice">
+            <i style="height:50%"></i><i style="height:80%;animation-delay:-.3s"></i><i style="height:100%;animation-delay:-.6s"></i><i style="height:70%;animation-delay:-.2s"></i><i style="height:90%;animation-delay:-.5s"></i><i style="height:55%;animation-delay:-.8s"></i><i style="height:75%;animation-delay:-.4s"></i>
+          </div></div>
+        </div>
+        <div class="f wide rv">
+          <h3 class="serif">Косметика и Тренер</h3>
+          <p>Крылья, шапки, рюкзаки, ангел и демон на плечах, эмоции — видят все с FixVisual. А в одиночном мире — бот-соперник: криты, перлы, бафы, три сложности.</p>
+          <div class="demo chips" style="margin-bottom:0"><span>20 видов крыльев</span><span>Драконьи</span><span>Кристальные</span><span>Сакура</span><span>Кибер</span><span>Джетпак</span><span>Пингвин</span><span>Корона</span><span>Нимб</span><span>Тренер: Mace</span><span>Перекрит</span><span>Вагонетки</span></div>
         </div>
       </div>
     </div>
@@ -678,16 +692,10 @@
     <div class="wrap">
       <div class="rv">
         <div class="kicker">Что нового</div>
-        <h2 class="serif title">Версия 3.10</h2>
+        <h2 class="serif title">Версия 3.9.6</h2>
         <p class="lead">Свежие обновления. Лаунчер ставит их сам, ничего качать заново не нужно.</p>
       </div>
       <div class="feat">
-        <div class="f wide rv">
-          <span class="ver">3.10</span>
-          <h3 class="serif">Новое солнце, Redstone Helper и TNT</h3>
-          <p>Мокрый пол теперь на всей земле до горизонта, с волнами и отражениями. Модуль Sun собрал тени, лучи и блики, а солнце стало круглым. Atmosphere умеет зиму, алое небо и закат. Redstone Helper строит 63 машины по голограмме, TNT показывает таймер и ударные волны. Новый стиль HUD «Обсидиан», Name Tags и поиск крафта.</p>
-          <div class="demo chips" style="margin-bottom:0"><span>Мокрый пол</span><span>Sun</span><span>Atmosphere</span><span>Redstone Helper</span><span>TNT</span><span>HUD «Обсидиан»</span><span>Name Tags</span><span>Craft Search</span></div>
-        </div>
         <div class="f wide rv">
           <span class="ver">3.9.6</span>
           <h3 class="serif">Блики, своя погода и голосовые</h3>
@@ -1436,178 +1444,6 @@
     });
     b.addEventListener('pointerleave', () => b.style.transform = '');
   });
-
-  // ===================== Фишки: хотбар, подсказка и пиксельные сцены =====================
-  (function fxGui() {
-    const cv = document.getElementById('fx-scene');
-    if (!cv) return;
-    const g = cv.getContext('2d'), W = 192, H = 108;
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const slots = [...document.querySelectorAll('.gui .slot')], tip = document.getElementById('fx-tip');
-    const PAL = { k: '#1d1d22', w: '#ffffff', g: '#9a9aa2', d: '#55555c', r: '#d8342c', o: '#f08a24', y: '#ffd83d', b: '#2f6fd8', c: '#7fd6ff', n: '#3fae4a', m: '#7a4e2c', p: '#a855f7' };
-    const ICONS = {
-      wet: '...cc......cc.....cccc...ccbbcc..cbbbbc..cbwbbc..ccbbcc...cccc..',
-      sun: 'y..y..y..y.oo.y...oyyo..yoyyyyoyyoyyyyoy..oyyo...y.oo.y.y..y..y.',
-      tnt: 'rrrrrrrrrrrrrrrrrrrrrrrrwwwwwwwwwkwkkwkwwwwwwwwwrrrrrrrrrrrrrrrr',
-      red: '...rr.....rwwr.....rr......mm......mm......mm......mm.....mmmm..',
-      os: 'kkkkkkkkkbbbbbbkkbwwbbbkkbbbbbbkkbbbwwbkkkkkkkkk...kk....kkkkkk.',
-      call: '.nn.....nnn.....nnn......nn.......nn......nnn.nn...nnnnn....nnn.',
-      voice: '...gg.....gggg....gggg....gggg...d.gg.d..dd..dd....dd.....dddd..',
-      kill: '....c......cwc....cwcc...ccccbc...ccbc.....cc......c............',
-      hud: 'kkkkkkkkkwwkggkkkkkkkkkk........kkkkkkkkkggggwwkkkkkkkkk........',
-      snow: 'w..w..w..w.ww.w...wccw..wwcwwcwwwwcwwcww..wccw...w.ww.w.w..w..w.',
-      tag: 'kkkkkkkkkwwwwwwkkkkkkkkk...kk.......kk......gggg....gggg....gg..',
-      esp: '..pppp...p....p.p......pp......pp......pp......p.p....p...pppp..',
-      find: '.gggg...g....g.g.cc.g..g.c..g..g....g...gggg.d.....d.d.....d.d..',
-      fps: '....yy.....yy.....yy.....yyyyy.....yy.....yy.....yy......y......',
-      crown: 'y..y..y.y.yyy.y.yyyyyyyyyrybyryyyyyyyyyy........................',
-      wing: 'w......www....wwwww..wwwwwwwwwww.wwwwww...wwww.....ww...........',
-      sword: '......cc.....ccc....ccc..m.ccc...mmcc....mm.....m.m....m........',
-      car: '........ ..rrrr....rccrr..rrrrrrrrrrrrrrrr.kk..kk..kk..kk.......'.replace(' ', '')
-    };
-    function icon(c, name) {
-      const x = c.getContext('2d'), s = ICONS[name] || '';
-      for (let i = 0; i < 64; i++) { const col = PAL[s[i]]; if (col) { x.fillStyle = col; x.fillRect(i % 8, i >> 3, 1, 1); } }
-    }
-    slots.forEach(b => icon(b.querySelector('canvas'), b.dataset.i));
-
-    const R = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
-    const sky = (top, mid, low, h) => { const n = 8; for (let i = 0; i < n; i++) { const k = i / (n - 1); const c = k < .5 ? mixc(top, mid, k * 2) : mixc(mid, low, k * 2 - 1); R(c, 0, h * i / n, W, h / n + 1); } };
-    const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
-    function mixc(a, b, k) { const A = hex(a), B = hex(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join(''); }
-    const mob = (x, y, body, head, flip) => { const d = flip ? -1 : 1; R(head, x - 3, y - 18 * d - (flip ? -12 : 0), 6, 6); R(body, x - 3, y - 12 * d - (flip ? -8 : 0), 6, 8); };
-    const rnd = i => { const s = Math.sin(i * 12.9898) * 43758.5453; return s - Math.floor(s); };
-
-    const SCENES = {
-      wet(t) {
-        sky('#2c2f4d', '#6a6a8e', '#d9a58a', 54);
-        R('#34405a', 0, 54, W, H - 54);
-        for (let y = 0; y < H - 54; y++) {
-          const k = 1 - y / (H - 54), off = Math.sin(y * .9 + t * 2.4) * (1 + y * .05);
-          R(mixc('#34405a', '#c79a8c', k * k * .85), off, 54 + y, W + 6, 1);
-        }
-        const x = 96; R('#7d3322', x - 3, 28, 6, 6); R('#5a5a7a', x - 3, 34, 6, 14); R('#a02a8a', x - 3, 48, 6, 6);
-        for (let y = 0; y < 26; y++) {
-          const off = Math.sin(y * .8 + t * 3) * (y * .08 + .5), a = 1 - y / 26;
-          g.globalAlpha = a * .75; R(y < 6 ? '#a02a8a' : y < 20 ? '#5a5a7a' : '#7d3322', x - 3 + off, 54 + y, 6, 1); g.globalAlpha = 1;
-        }
-        for (let i = 0; i < 5; i++) {
-          const p = (t * .4 + i * .23) % 1, cx = 20 + rnd(i) * 150, cy = 62 + rnd(i + 9) * 38, r = 2 + p * 16;
-          g.globalAlpha = (1 - p) * .55; g.strokeStyle = '#cfe0f4'; g.lineWidth = 1; g.beginPath(); g.ellipse(cx, cy, r, r * .3, 0, 0, 7); g.stroke(); g.globalAlpha = 1;
-        }
-      },
-      sun(t) {
-        sky('#3a4a7c', '#c97b5a', '#ffc27a', 66);
-        const sx = 128, sy = 50;
-        for (let i = 0; i < 14; i++) {
-          const a = i / 14 * Math.PI * 2 + t * .05, w = .05, len = 150;
-          g.globalAlpha = .14 + .08 * Math.sin(t + i * 2); g.fillStyle = '#ffe9b0'; g.beginPath(); g.moveTo(sx, sy);
-          g.lineTo(sx + Math.cos(a - w) * len, sy + Math.sin(a - w) * len); g.lineTo(sx + Math.cos(a + w) * len, sy + Math.sin(a + w) * len); g.fill(); g.globalAlpha = 1;
-        }
-        g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(sx, sy, 14, 0, 7); g.fill();
-        g.fillStyle = '#fffbe8'; g.beginPath(); g.arc(sx, sy, 9, 0, 7); g.fill();
-        R('#2f4a2a', 0, 66, W, H - 66); R('#27401f', 0, 66, W, 3);
-        R('#4a2f1c', 50, 42, 5, 24); R('#1f4a22', 40, 26, 25, 18);
-        g.globalAlpha = .5; g.fillStyle = '#16251a'; g.beginPath(); g.moveTo(50, 66); g.lineTo(55, 66); g.lineTo(20, 100); g.lineTo(0, 100); g.fill(); g.globalAlpha = 1;
-      },
-      tnt(t) {
-        const p = (t / 4) % 1; sky('#27304f', '#46567f', '#7f8fb0', 70);
-        R('#3a5a2c', 0, 70, W, 6); R('#5a3d26', 0, 76, W, H - 76);
-        const cx = 96, cy = 70;
-        if (p < .55) {
-          const blink = p > .35 && Math.floor(t * 8) % 2;
-          R(blink ? '#ffffff' : '#d8342c', cx - 8, cy - 16, 16, 16); R('#fff', cx - 8, cy - 11, 16, 6); R('#1d1d22', cx - 6, cy - 9, 12, 2);
-          const left = Math.max(0, (.55 - p) / .55), n = Math.round(left * 16);
-          R('#1d1d22', cx - 10, cy - 24, 20, 4); R(left > .4 ? '#55ff55' : '#ff5555', cx - 9, cy - 23, 18 * left, 2);
-          if (n) R('#ffd83d', cx, cy - 18, 1, 2);
-        } else {
-          const e = (p - .55) / .45, r = e * 130;
-          g.globalAlpha = Math.max(0, 1 - e * 3); g.fillStyle = '#fff4c0'; g.beginPath(); g.arc(cx, cy - 8, 8 + e * 90, 0, 7); g.fill(); g.globalAlpha = 1;
-          [[r, 1], [r * .68, .6]].forEach(([q, k]) => { g.globalAlpha = (1 - e) * k; g.strokeStyle = '#ffc070'; g.lineWidth = 3; g.beginPath(); g.ellipse(cx, cy + 3, q, q * .13, 0, 0, 7); g.stroke(); g.globalAlpha = 1; });
-          for (let i = 0; i < 40; i++) {
-            const a = rnd(i) * 6.283, s = 20 + rnd(i + 40) * 70;
-            R(mixc('#fff0c0', '#ff5a1a', e), cx + Math.cos(a) * s * e, cy - 8 + Math.sin(a) * s * e * .7 + e * e * 26, 2, 2);
-          }
-        }
-      },
-      red(t) {
-        R('#3a5a2c', 0, 0, W, H);
-        for (let i = 0; i < 90; i++) R(rnd(i) > .5 ? '#335226' : '#426632', rnd(i + 1) * W, rnd(i + 2) * H, 6, 6);
-        const parts = [[0, 4, '#8a8a8a'], [1, 4, '#8a8a8a'], [2, 4, '#8a8a8a'], [3, 4, '#8a8a8a'], [4, 4, '#8a8a8a'], [5, 4, '#8a8a8a'], [0, 3, '#b08050'], [1, 3, '#d8342c'], [2, 3, '#d8342c'], [3, 3, '#d8342c'], [4, 3, '#d8342c'], [5, 3, '#d82c2c']];
-        const built = Math.floor(t * 2) % (parts.length + 4), s = 18, ox = 42, oy = 16;
-        parts.forEach(([x, y, c], i) => {
-          const px = ox + x * s, py = oy + y * s;
-          if (i < built) R(c, px, py, s, s), R('#00000033', px, py + s - 3, s, 3);
-          else { g.globalAlpha = .4 + .15 * Math.sin(t * 3 + i); R(c, px, py, s, s); g.globalAlpha = 1; g.strokeStyle = '#ffffff'; g.lineWidth = 1; g.strokeRect(px + .5, py + .5, s - 1, s - 1); }
-        });
-      },
-      os(t) {
-        R('#14161f', 0, 0, W, H); R('#23262f', 0, 84, W, H - 84);
-        R('#0d1a33', 30, 12, 132, 66); R('#2f6fd8', 34, 16, 70, 44); R('#e8ecf5', 34, 16, 70, 5);
-        R('#1d2a4a', 108, 16, 50, 26); R('#ffd83d', 112, 24, 20 + Math.sin(t) * 8, 3); R('#1d2a4a', 108, 46, 50, 28);
-        for (let i = 0; i < 9; i++) R('#7fd6ff', 112 + i * 4, 70 - (6 + Math.abs(Math.sin(t * 3 + i)) * 14), 3, 6 + Math.abs(Math.sin(t * 3 + i)) * 14);
-        R('#8a6a50', 88, 86, 16, 16); R('#3a2a20', 88, 86, 16, 5);
-      },
-      call(t) {
-        R('#1b2a3a', 0, 0, W, H); for (let i = 0; i < 7; i++) R('#22344a', i * 30, 0, 14, H);
-        R('#0d0d10', 46, 30, 100, 44); R('#3fae4a', 54, 38, 24, 24); R('#fff', 60, 44, 12, 12);
-        R('#f4f3f7', 86, 40, 46, 4); R('#85868e', 86, 50, 34, 3);
-        const k = Math.floor(t * 3) % 2; R(k ? '#55ff55' : '#3fae4a', 118, 58, 10, 10); R('#d8342c', 104, 58, 10, 10);
-        for (let i = 0; i < 3; i++) { const p = (t * .6 + i / 3) % 1; g.globalAlpha = (1 - p) * .6; g.strokeStyle = '#55ff55'; g.lineWidth = 2; g.strokeRect(46 - p * 26, 30 - p * 20, 100 + p * 52, 44 + p * 40); g.globalAlpha = 1; }
-      },
-      voice(t) {
-        R('#12101c', 0, 0, W, H);
-        for (let i = 0; i < 40; i++) {
-          const h = 6 + Math.abs(Math.sin(i * .55 + t * 3) * Math.sin(i * .17 + t)) * 60;
-          R(mixc('#7a5cff', '#7fd6ff', i / 40), 16 + i * 4, 54 - h / 2, 3, h);
-        }
-      },
-      kill(t) {
-        const p = (t / 3.5) % 1; sky('#1c2a44', '#2c4468', '#4a6a90', 72); R('#dfe9f2', 0, 72, W, H - 72);
-        const x = 96;
-        if (p < .55) {
-          const ice = Math.min(1, p / .3);
-          R(mixc('#c8a080', '#a8e4ff', ice), x - 4, 32, 8, 8); R(mixc('#3a7a9a', '#a8e4ff', ice), x - 6, 40, 12, 14); R(mixc('#3a3a6a', '#a8e4ff', ice), x - 4, 54, 8, 18);
-          if (ice === 1) { g.globalAlpha = .35; R('#ffffff', x - 8, 28, 16, 44); g.globalAlpha = 1; }
-        } else {
-          const e = (p - .55) / .45;
-          for (let i = 0; i < 46; i++) {
-            const a = rnd(i) * 6.283, s = 12 + rnd(i + 7) * 60;
-            R(i % 3 ? '#a8e4ff' : '#ffffff', x + Math.cos(a) * s * e, 50 + Math.sin(a) * s * e * .6 + e * e * 30, 3, 3);
-          }
-        }
-      },
-      hud(t) {
-        sky('#6a8ad0', '#9ab4e0', '#c8d8f0', 60); R('#3f7a3a', 0, 60, W, H - 60);
-        R('#0d0d10', 44, 8, 104, 12); R('#f4f3f7', 49, 12, 18, 3); R('#85868e', 72, 12, 14 + (Math.sin(t) + 1) * 3, 3); R('#85868e', 96, 12, 12, 3); R('#85868e', 116, 12, 26, 3);
-        R('#0d0d10', 8, 34, 42, 10); R('#f4f3f7', 14, 38, 22, 3);
-        R('#0d0d10', 8, 48, 62, 30); for (let i = 0; i < 3; i++) { R('#c8c8d0', 13, 53 + i * 8, 28, 3); R('#26262c', 50, 52 + i * 8, 16, 5); }
-        R('#0d0d10', 118, 78, 16, 16); R('#c8906c', 121, 81, 10, 10);
-        R('#0d0d10', 137, 78, 46, 16); R('#f4f3f7', 141, 82, 20, 3); R('#1f4d2a', 165, 81, 14, 6); R('#55ff55', 167, 83, 10, 2);
-      }
-    };
-
-    let cur = 'wet', visible = false, raf = 0;
-    const frame = ms => { (SCENES[cur] || SCENES.wet)(ms / 1000); if (visible && !still) raf = requestAnimationFrame(frame); };
-    const paint = () => { cancelAnimationFrame(raf); if (still) frame(2300); else if (visible) raf = requestAnimationFrame(frame); };
-    function pick(b) {
-      slots.forEach(s => s.setAttribute('aria-pressed', s === b ? 'true' : 'false'));
-      tip.querySelector('b').textContent = b.querySelector('.nm').textContent;
-      tip.querySelector('p').textContent = b.querySelector('.ds').textContent;
-      tip.querySelector('i').textContent = b.dataset.new || '';
-      if (b.dataset.s) cur = b.dataset.s;
-      if (still) paint();
-    }
-    slots.forEach(b => { b.addEventListener('click', () => pick(b)); });
-    pick(slots[0]);
-    new IntersectionObserver(es => { visible = es[0].isIntersecting; paint(); }).observe(cv);
-    addEventListener('keydown', e => {
-      if (!visible || e.ctrlKey || e.altKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable) return;
-      const n = +e.key;
-      if (n >= 1 && n <= 9) pick(slots[n - 1]);
-    });
-    paint();
-  })();
 
   // таймлайн: прокрутка = время, разделы = ключевые кадры
   (function timeline() {
